@@ -1026,3 +1026,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
 - **Ref**: `chk-458363`
 
+### Milestone: 2025-09-02 09:55:16
+- **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
+- **Ref**: `chk-661741`
+
