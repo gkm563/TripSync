@@ -1050,3 +1050,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(export): add export itinerary to Apple Wallet and Google Calendar format`
 - **Ref**: `chk-228151`
 
+### Milestone: 2025-09-04 12:04:26
+- **Scope**: `chore(deps): upgrade mapping SDK and native bridge dependencies`
+- **Ref**: `chk-589309`
+
