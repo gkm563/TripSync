@@ -1070,3 +1070,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(models): decouple transport booking details from general activity nodes`
 - **Ref**: `chk-410324`
 
+### Milestone: 2025-09-07 22:56:37
+- **Scope**: `fix(currency): handle real-time exchange rate fluctuation in split-expense calculations`
+- **Ref**: `chk-908045`
+
