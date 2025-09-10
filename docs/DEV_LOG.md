@@ -1082,3 +1082,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `perf(maps): optimize vector tile map rendering and landmark clustering`
 - **Ref**: `chk-360262`
 
+### Milestone: 2025-09-10 16:35:58
+- **Scope**: `docs(sync): document peer-to-peer conflict resolution for collaborative itineraries`
+- **Ref**: `chk-818273`
+
