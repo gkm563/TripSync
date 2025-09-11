@@ -1094,3 +1094,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): redesign itinerary timeline cards with transport mode iconography`
 - **Ref**: `chk-360700`
 
+### Milestone: 2025-09-11 18:20:12
+- **Scope**: `feat(geo): implement multi-stop route optimization using graph traversal heuristics`
+- **Ref**: `chk-325457`
+
