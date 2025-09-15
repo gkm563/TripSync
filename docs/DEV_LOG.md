@@ -1114,3 +1114,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(api): document travel sync schemas and WebSocket event protocols`
 - **Ref**: `chk-357340`
 
+### Milestone: 2025-09-15 14:32:40
+- **Scope**: `feat(export): add export itinerary to Apple Wallet and Google Calendar format`
+- **Ref**: `chk-897748`
+
