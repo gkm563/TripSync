@@ -1126,3 +1126,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(export): add export itinerary to Apple Wallet and Google Calendar format`
 - **Ref**: `chk-561033`
 
+### Milestone: 2025-09-16 22:59:15
+- **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
+- **Ref**: `chk-271249`
+
