@@ -1130,3 +1130,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
 - **Ref**: `chk-271249`
 
+### Milestone: 2025-09-17 10:31:03
+- **Scope**: `perf(maps): optimize vector tile map rendering and landmark clustering`
+- **Ref**: `chk-589515`
+
