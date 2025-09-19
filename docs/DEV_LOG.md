@@ -1142,3 +1142,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `fix(currency): handle real-time exchange rate fluctuation in split-expense calculations`
 - **Ref**: `chk-305924`
 
+### Milestone: 2025-09-19 15:42:25
+- **Scope**: `chore(deps): upgrade mapping SDK and native bridge dependencies`
+- **Ref**: `chk-977503`
+
