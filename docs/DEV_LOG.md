@@ -1154,3 +1154,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `test(expense): add unit tests for debt simplification and settlements algorithm`
 - **Ref**: `chk-721246`
 
+### Milestone: 2025-09-22 19:44:27
+- **Scope**: `refactor(models): decouple transport booking details from general activity nodes`
+- **Ref**: `chk-153620`
+
