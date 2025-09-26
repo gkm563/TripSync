@@ -1178,3 +1178,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(api): document travel sync schemas and WebSocket event protocols`
 - **Ref**: `chk-166547`
 
+### Milestone: 2025-09-26 14:54:16
+- **Scope**: `style(ui): redesign itinerary timeline cards with transport mode iconography`
+- **Ref**: `chk-367631`
+
