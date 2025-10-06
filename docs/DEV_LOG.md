@@ -1230,3 +1230,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
 - **Ref**: `chk-616200`
 
+### Milestone: 2025-10-06 10:40:03
+- **Scope**: `test(expense): add unit tests for debt simplification and settlements algorithm`
+- **Ref**: `chk-773114`
+
