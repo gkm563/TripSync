@@ -1286,3 +1286,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(models): decouple transport booking details from general activity nodes`
 - **Ref**: `chk-913472`
 
+### Milestone: 2025-10-11 18:43:34
+- **Scope**: `fix(timezone): correct departure and arrival time conversion across timezones`
+- **Ref**: `chk-259897`
+
