@@ -1306,3 +1306,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `chore(deps): upgrade mapping SDK and native bridge dependencies`
 - **Ref**: `chk-278116`
 
+### Milestone: 2025-10-15 16:55:48
+- **Scope**: `refactor(models): decouple transport booking details from general activity nodes`
+- **Ref**: `chk-741043`
+
