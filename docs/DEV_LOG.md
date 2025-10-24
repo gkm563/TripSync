@@ -2402,3 +2402,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): polish travel timeline connector lines and badges`
 - **Ref**: `sync-817509`
 
+### Sprint Update: 2025-10-24 19:29:21
+- **Scope**: `docs(specs): document trip collaboration websocket protocol`
+- **Ref**: `sync-286829`
+
