@@ -2414,3 +2414,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `test(calc): verify precision of split bill rounding algorithms`
 - **Ref**: `sync-153806`
 
+### Sprint Update: 2025-10-25 15:37:34
+- **Scope**: `perf(storage): compress cached itinerary JSON before disk write`
+- **Ref**: `sync-395296`
+
