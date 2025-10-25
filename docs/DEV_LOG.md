@@ -1350,3 +1350,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(geo): implement multi-stop route optimization using graph traversal heuristics`
 - **Ref**: `chk-792788`
 
+### Milestone: 2025-10-25 13:04:37
+- **Scope**: `docs(api): document travel sync schemas and WebSocket event protocols`
+- **Ref**: `chk-495290`
+
