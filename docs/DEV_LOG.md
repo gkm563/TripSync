@@ -1366,3 +1366,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(geo): implement multi-stop route optimization using graph traversal heuristics`
 - **Ref**: `chk-191001`
 
+### Milestone: 2025-10-29 17:00:17
+- **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
+- **Ref**: `chk-387877`
+
