@@ -2510,3 +2510,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `fix(map): correct marker placement coordinate offset on zoom`
 - **Ref**: `sync-136533`
 
+### Sprint Update: 2025-11-04 20:03:01
+- **Scope**: `perf(storage): compress cached itinerary JSON before disk write`
+- **Ref**: `sync-134339`
+
