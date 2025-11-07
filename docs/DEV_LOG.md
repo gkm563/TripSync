@@ -1430,3 +1430,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `perf(maps): optimize vector tile map rendering and landmark clustering`
 - **Ref**: `chk-560321`
 
+### Milestone: 2025-11-07 21:59:41
+- **Scope**: `refactor(models): decouple transport booking details from general activity nodes`
+- **Ref**: `chk-434874`
+
