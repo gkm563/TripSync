@@ -1422,3 +1422,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(sync): document peer-to-peer conflict resolution for collaborative itineraries`
 - **Ref**: `chk-284402`
 
+### Milestone: 2025-11-07 15:22:38
+- **Scope**: `style(ui): redesign itinerary timeline cards with transport mode iconography`
+- **Ref**: `chk-349112`
+
