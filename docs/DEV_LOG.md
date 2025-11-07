@@ -1418,3 +1418,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `fix(timezone): correct departure and arrival time conversion across timezones`
 - **Ref**: `chk-137855`
 
+### Milestone: 2025-11-07 12:07:04
+- **Scope**: `docs(sync): document peer-to-peer conflict resolution for collaborative itineraries`
+- **Ref**: `chk-284402`
+
