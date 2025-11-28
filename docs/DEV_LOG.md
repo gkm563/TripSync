@@ -1542,3 +1542,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `test(expense): add unit tests for debt simplification and settlements algorithm`
 - **Ref**: `chk-718326`
 
+### Milestone: 2025-11-28 22:05:34
+- **Scope**: `docs(api): document travel sync schemas and WebSocket event protocols`
+- **Ref**: `chk-672465`
+
