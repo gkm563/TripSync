@@ -1534,3 +1534,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): redesign itinerary timeline cards with transport mode iconography`
 - **Ref**: `chk-298670`
 
+### Milestone: 2025-11-28 11:27:30
+- **Scope**: `test(expense): add unit tests for debt simplification and settlements algorithm`
+- **Ref**: `chk-888319`
+
