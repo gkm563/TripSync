@@ -2626,3 +2626,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `fix(map): correct marker placement coordinate offset on zoom`
 - **Ref**: `sync-948459`
 
+### Sprint Update: 2025-11-30 19:50:30
+- **Scope**: `docs(specs): document trip collaboration websocket protocol`
+- **Ref**: `sync-153591`
+
