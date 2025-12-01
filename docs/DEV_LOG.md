@@ -1554,3 +1554,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): redesign itinerary timeline cards with transport mode iconography`
 - **Ref**: `chk-315639`
 
+### Milestone: 2025-12-01 21:10:41
+- **Scope**: `refactor(models): decouple transport booking details from general activity nodes`
+- **Ref**: `chk-400652`
+
