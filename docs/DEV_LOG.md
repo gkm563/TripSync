@@ -1566,3 +1566,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(sync): document peer-to-peer conflict resolution for collaborative itineraries`
 - **Ref**: `chk-795298`
 
+### Milestone: 2025-12-03 23:18:12
+- **Scope**: `feat(export): add export itinerary to Apple Wallet and Google Calendar format`
+- **Ref**: `chk-788868`
+
