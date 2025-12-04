@@ -1574,3 +1574,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(export): add export itinerary to Apple Wallet and Google Calendar format`
 - **Ref**: `chk-888454`
 
+### Milestone: 2025-12-04 19:08:03
+- **Scope**: `feat(geo): implement multi-stop route optimization using graph traversal heuristics`
+- **Ref**: `chk-791295`
+
