@@ -1582,3 +1582,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(sync): document peer-to-peer conflict resolution for collaborative itineraries`
 - **Ref**: `chk-947004`
 
+### Milestone: 2025-12-05 21:18:55
+- **Scope**: `test(expense): add unit tests for debt simplification and settlements algorithm`
+- **Ref**: `chk-267375`
+
