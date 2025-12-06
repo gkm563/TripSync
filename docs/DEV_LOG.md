@@ -2654,3 +2654,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(specs): document trip collaboration websocket protocol`
 - **Ref**: `sync-586672`
 
+### Sprint Update: 2025-12-06 19:20:24
+- **Scope**: `feat(expenses): add multi-currency breakdown on group settle up view`
+- **Ref**: `sync-105175`
+
