@@ -1602,3 +1602,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `chore(deps): upgrade mapping SDK and native bridge dependencies`
 - **Ref**: `chk-608353`
 
+### Milestone: 2025-12-08 23:24:53
+- **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
+- **Ref**: `chk-861676`
+
