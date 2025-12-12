@@ -1618,3 +1618,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(sync): document peer-to-peer conflict resolution for collaborative itineraries`
 - **Ref**: `chk-534642`
 
+### Milestone: 2025-12-12 13:30:57
+- **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
+- **Ref**: `chk-776229`
+
