@@ -2742,3 +2742,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): polish travel timeline connector lines and badges`
 - **Ref**: `sync-542079`
 
+### Sprint Update: 2025-12-25 22:50:25
+- **Scope**: `perf(storage): compress cached itinerary JSON before disk write`
+- **Ref**: `sync-855779`
+
