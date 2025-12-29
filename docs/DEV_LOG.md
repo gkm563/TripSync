@@ -2782,3 +2782,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(sync): enhance offline change conflict resolution rules`
 - **Ref**: `sync-649074`
 
+### Sprint Update: 2025-12-29 16:44:15
+- **Scope**: `feat(expenses): add multi-currency breakdown on group settle up view`
+- **Ref**: `sync-281228`
+
