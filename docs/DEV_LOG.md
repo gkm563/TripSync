@@ -1714,3 +1714,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): redesign itinerary timeline cards with transport mode iconography`
 - **Ref**: `chk-651313`
 
+### Milestone: 2026-01-07 15:17:48
+- **Scope**: `fix(currency): handle real-time exchange rate fluctuation in split-expense calculations`
+- **Ref**: `chk-636771`
+
