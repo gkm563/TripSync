@@ -1706,3 +1706,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `fix(timezone): correct departure and arrival time conversion across timezones`
 - **Ref**: `chk-528685`
 
+### Milestone: 2026-01-07 10:55:49
+- **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
+- **Ref**: `chk-805877`
+
