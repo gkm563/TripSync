@@ -1742,3 +1742,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
 - **Ref**: `chk-684120`
 
+### Milestone: 2026-01-12 16:51:15
+- **Scope**: `docs(api): document travel sync schemas and WebSocket event protocols`
+- **Ref**: `chk-859751`
+
