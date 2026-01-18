@@ -1766,3 +1766,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `perf(maps): optimize vector tile map rendering and landmark clustering`
 - **Ref**: `chk-861846`
 
+### Milestone: 2026-01-18 19:10:42
+- **Scope**: `test(expense): add unit tests for debt simplification and settlements algorithm`
+- **Ref**: `chk-142155`
+
