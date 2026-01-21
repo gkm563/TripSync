@@ -1770,3 +1770,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `test(expense): add unit tests for debt simplification and settlements algorithm`
 - **Ref**: `chk-142155`
 
+### Milestone: 2026-01-21 14:40:09
+- **Scope**: `style(ui): redesign itinerary timeline cards with transport mode iconography`
+- **Ref**: `chk-428629`
+
