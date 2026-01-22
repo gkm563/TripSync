@@ -1778,3 +1778,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): redesign itinerary timeline cards with transport mode iconography`
 - **Ref**: `chk-195780`
 
+### Milestone: 2026-01-22 10:48:46
+- **Scope**: `feat(export): add export itinerary to Apple Wallet and Google Calendar format`
+- **Ref**: `chk-874380`
+
