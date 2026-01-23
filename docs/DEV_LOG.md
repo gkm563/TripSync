@@ -1798,3 +1798,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(storage): abstract local offline IndexedDB cache behind repository interface`
 - **Ref**: `chk-438959`
 
+### Milestone: 2026-01-23 14:38:00
+- **Scope**: `fix(currency): handle real-time exchange rate fluctuation in split-expense calculations`
+- **Ref**: `chk-813307`
+
