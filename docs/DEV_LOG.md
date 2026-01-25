@@ -2918,3 +2918,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(expenses): add multi-currency breakdown on group settle up view`
 - **Ref**: `sync-873253`
 
+### Sprint Update: 2026-01-25 19:39:07
+- **Scope**: `fix(map): correct marker placement coordinate offset on zoom`
+- **Ref**: `sync-904411`
+
