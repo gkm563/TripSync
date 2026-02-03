@@ -1850,3 +1850,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `fix(currency): handle real-time exchange rate fluctuation in split-expense calculations`
 - **Ref**: `chk-149855`
 
+### Milestone: 2026-02-03 11:43:24
+- **Scope**: `refactor(models): decouple transport booking details from general activity nodes`
+- **Ref**: `chk-948403`
+
