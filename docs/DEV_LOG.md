@@ -1866,3 +1866,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `fix(timezone): correct departure and arrival time conversion across timezones`
 - **Ref**: `chk-154201`
 
+### Milestone: 2026-02-04 21:45:31
+- **Scope**: `perf(maps): optimize vector tile map rendering and landmark clustering`
+- **Ref**: `chk-257317`
+
