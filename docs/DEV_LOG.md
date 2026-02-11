@@ -1918,3 +1918,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `chore(deps): upgrade mapping SDK and native bridge dependencies`
 - **Ref**: `chk-307446`
 
+### Milestone: 2026-02-11 13:45:05
+- **Scope**: `fix(timezone): correct departure and arrival time conversion across timezones`
+- **Ref**: `chk-627139`
+
