@@ -3102,3 +3102,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `test(calc): verify precision of split bill rounding algorithms`
 - **Ref**: `sync-479136`
 
+### Sprint Update: 2026-02-24 09:10:37
+- **Scope**: `docs(specs): document trip collaboration websocket protocol`
+- **Ref**: `sync-374565`
+
