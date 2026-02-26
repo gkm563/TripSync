@@ -3126,3 +3126,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(specs): document trip collaboration websocket protocol`
 - **Ref**: `sync-242030`
 
+### Sprint Update: 2026-02-26 14:12:34
+- **Scope**: `refactor(sync): enhance offline change conflict resolution rules`
+- **Ref**: `sync-809986`
+
