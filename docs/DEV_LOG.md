@@ -1998,3 +1998,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(export): add export itinerary to Apple Wallet and Google Calendar format`
 - **Ref**: `chk-728484`
 
+### Milestone: 2026-02-28 17:22:34
+- **Scope**: `perf(maps): optimize vector tile map rendering and landmark clustering`
+- **Ref**: `chk-622537`
+
