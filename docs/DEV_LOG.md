@@ -2034,3 +2034,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(api): document travel sync schemas and WebSocket event protocols`
 - **Ref**: `chk-281964`
 
+### Milestone: 2026-03-07 15:00:00
+- **Scope**: `docs(sync): document peer-to-peer conflict resolution for collaborative itineraries`
+- **Ref**: `chk-207934`
+
