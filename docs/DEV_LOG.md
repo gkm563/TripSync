@@ -2078,3 +2078,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `fix(timezone): correct departure and arrival time conversion across timezones`
 - **Ref**: `chk-909505`
 
+### Milestone: 2026-03-19 12:39:39
+- **Scope**: `fix(currency): handle real-time exchange rate fluctuation in split-expense calculations`
+- **Ref**: `chk-771425`
+
