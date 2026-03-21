@@ -3218,3 +3218,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): polish travel timeline connector lines and badges`
 - **Ref**: `sync-773139`
 
+### Sprint Update: 2026-03-21 20:36:01
+- **Scope**: `fix(map): correct marker placement coordinate offset on zoom`
+- **Ref**: `sync-521057`
+
