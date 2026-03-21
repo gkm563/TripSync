@@ -2098,3 +2098,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): redesign itinerary timeline cards with transport mode iconography`
 - **Ref**: `chk-207906`
 
+### Milestone: 2026-03-21 12:28:04
+- **Scope**: `fix(timezone): correct departure and arrival time conversion across timezones`
+- **Ref**: `chk-910092`
+
