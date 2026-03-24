@@ -2110,3 +2110,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(api): document travel sync schemas and WebSocket event protocols`
 - **Ref**: `chk-659743`
 
+### Milestone: 2026-03-24 10:58:09
+- **Scope**: `fix(timezone): correct departure and arrival time conversion across timezones`
+- **Ref**: `chk-634877`
+
