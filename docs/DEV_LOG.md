@@ -2118,3 +2118,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `chore(deps): upgrade mapping SDK and native bridge dependencies`
 - **Ref**: `chk-354598`
 
+### Milestone: 2026-03-25 11:50:30
+- **Scope**: `feat(export): add export itinerary to Apple Wallet and Google Calendar format`
+- **Ref**: `chk-934261`
+
