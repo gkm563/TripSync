@@ -2150,3 +2150,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(export): add export itinerary to Apple Wallet and Google Calendar format`
 - **Ref**: `chk-199935`
 
+### Milestone: 2026-03-29 20:18:45
+- **Scope**: `fix(currency): handle real-time exchange rate fluctuation in split-expense calculations`
+- **Ref**: `chk-724604`
+
