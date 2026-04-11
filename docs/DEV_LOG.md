@@ -74,3 +74,7 @@ Daily activity and development milestones tracking.
 - **Activity**: feat(geo): refine route calculation helper
 - **Checkpoint**: `740063`
 
+### Entry: 2026-04-11 22:42:51
+- **Activity**: fix: handle offline state fallbacks gracefully
+- **Checkpoint**: `836343`
+
