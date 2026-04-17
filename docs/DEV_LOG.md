@@ -3314,3 +3314,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `test(calc): verify precision of split bill rounding algorithms`
 - **Ref**: `sync-918236`
 
+### Sprint Update: 2026-04-17 10:12:15
+- **Scope**: `style(ui): polish travel timeline connector lines and badges`
+- **Ref**: `sync-985580`
+
