@@ -3330,3 +3330,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `style(ui): polish travel timeline connector lines and badges`
 - **Ref**: `sync-163902`
 
+### Sprint Update: 2026-04-19 18:49:46
+- **Scope**: `feat(expenses): add multi-currency breakdown on group settle up view`
+- **Ref**: `sync-980532`
+
