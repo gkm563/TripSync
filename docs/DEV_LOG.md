@@ -3346,3 +3346,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `perf(storage): compress cached itinerary JSON before disk write`
 - **Ref**: `sync-322276`
 
+### Sprint Update: 2026-04-21 12:16:42
+- **Scope**: `docs(specs): document trip collaboration websocket protocol`
+- **Ref**: `sync-628722`
+
