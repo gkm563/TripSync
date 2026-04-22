@@ -3358,3 +3358,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `perf(storage): compress cached itinerary JSON before disk write`
 - **Ref**: `sync-755635`
 
+### Sprint Update: 2026-04-22 16:07:44
+- **Scope**: `refactor(sync): enhance offline change conflict resolution rules`
+- **Ref**: `sync-120462`
+
