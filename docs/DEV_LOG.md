@@ -186,3 +186,7 @@ Daily activity and development milestones tracking.
 - **Activity**: refactor: optimize location caching layer
 - **Checkpoint**: `880805`
 
+### Entry: 2026-04-26 19:49:47
+- **Activity**: docs(api): document travel sync schemas
+- **Checkpoint**: `388429`
+
