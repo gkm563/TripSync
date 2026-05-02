@@ -3406,3 +3406,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(expenses): add multi-currency breakdown on group settle up view`
 - **Ref**: `sync-256753`
 
+### Sprint Update: 2026-05-02 11:48:46
+- **Scope**: `perf(storage): compress cached itinerary JSON before disk write`
+- **Ref**: `sync-640984`
+
