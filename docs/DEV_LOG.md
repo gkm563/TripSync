@@ -202,3 +202,7 @@ Daily activity and development milestones tracking.
 - **Activity**: feat(geo): refine route calculation helper
 - **Checkpoint**: `322284`
 
+### Entry: 2026-05-02 13:55:05
+- **Activity**: docs(api): document travel sync schemas
+- **Checkpoint**: `547555`
+
