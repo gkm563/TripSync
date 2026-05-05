@@ -230,3 +230,7 @@ Daily activity and development milestones tracking.
 - **Activity**: chore: dependency updates and linting
 - **Checkpoint**: `238606`
 
+### Entry: 2026-05-05 18:13:30
+- **Activity**: docs(api): document travel sync schemas
+- **Checkpoint**: `978019`
+
