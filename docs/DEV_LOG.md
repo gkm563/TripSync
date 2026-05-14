@@ -3530,3 +3530,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(specs): document trip collaboration websocket protocol`
 - **Ref**: `sync-765659`
 
+### Sprint Update: 2026-05-14 09:20:03
+- **Scope**: `test(calc): verify precision of split bill rounding algorithms`
+- **Ref**: `sync-674063`
+
