@@ -282,3 +282,7 @@ Daily activity and development milestones tracking.
 - **Activity**: perf: reduce map tile rendering overhead
 - **Checkpoint**: `826035`
 
+### Entry: 2026-05-17 20:22:43
+- **Activity**: docs(api): document travel sync schemas
+- **Checkpoint**: `688678`
+
