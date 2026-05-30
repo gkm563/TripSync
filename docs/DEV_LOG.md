@@ -3594,3 +3594,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(expenses): add multi-currency breakdown on group settle up view`
 - **Ref**: `sync-119018`
 
+### Sprint Update: 2026-05-30 19:50:46
+- **Scope**: `test(calc): verify precision of split bill rounding algorithms`
+- **Ref**: `sync-465417`
+
