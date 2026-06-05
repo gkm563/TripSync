@@ -430,3 +430,7 @@ Daily activity and development milestones tracking.
 - **Activity**: refactor: optimize location caching layer
 - **Checkpoint**: `489524`
 
+### Entry: 2026-06-05 16:06:04
+- **Activity**: feat(geo): refine route calculation helper
+- **Checkpoint**: `173875`
+
