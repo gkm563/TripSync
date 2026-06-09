@@ -9,7 +9,8 @@ import {
   ActivityIndicator, 
   KeyboardAvoidingView, 
   Platform,
-  ScrollView
+  ScrollView,
+  Alert
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../store/authStore';
@@ -23,6 +24,30 @@ export default function AuthScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  const handleGoogleLogin = () => {
+    Alert.prompt(
+      'Google Sign In',
+      'Please enter your Google Email address:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign In',
+          onPress: async (googleEmail) => {
+            if (!googleEmail || !googleEmail.includes('@')) {
+              Alert.alert('Error', 'Please enter a valid Google email address.');
+              return;
+            }
+            try {
+              await login(googleEmail);
+            } catch (e: any) {
+              Alert.alert('Sign In Failed', e.message || 'Failed to sign in with Google');
+            }
+          }
+        }
+      ]
+    );
+  };
 
   const handleSubmit = async () => {
     if (!email) {
@@ -165,7 +190,7 @@ export default function AuthScreen() {
           )}
 
           {USE_FIREBASE && (
-            <TouchableOpacity style={styles.googleButton}>
+            <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
               <Image 
                 source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png' }} 
                 style={styles.googleIcon} 
