@@ -7,7 +7,8 @@ import {
   TouchableOpacity, 
   ScrollView, 
   Alert,
-  Image
+  Image,
+  ActivityIndicator
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
