@@ -137,7 +137,11 @@ export const useAuthStore = create<AuthState>()(
             }
           }
         } catch (err: any) {
-          set({ error: err.message, loading: false });
+          const errorMsg = err.code === 'auth/configuration-not-found'
+            ? "Firebase Authentication is disabled or not enabled for Email/Password. Please open Firebase Console -> Build -> Authentication -> Sign-in Method, and enable the 'Email/Password' provider."
+            : err.message;
+          set({ error: errorMsg, loading: false });
+          throw new Error(errorMsg);
         }
       },
 
@@ -186,7 +190,11 @@ export const useAuthStore = create<AuthState>()(
             });
           }
         } catch (err: any) {
-          set({ error: err.message, loading: false });
+          const errorMsg = err.code === 'auth/configuration-not-found'
+            ? "Firebase Authentication is disabled or not enabled for Email/Password. Please open Firebase Console -> Build -> Authentication -> Sign-in Method, and enable the 'Email/Password' provider."
+            : err.message;
+          set({ error: errorMsg, loading: false });
+          throw new Error(errorMsg);
         }
       },
 
