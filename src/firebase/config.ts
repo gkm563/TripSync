@@ -5,13 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Firebase credentials
 const firebaseConfig = {
-  apiKey: "AIzaSyC-1DJV2HIuQSb0bWxmOsmpn0h-zmVn-pc",
-  authDomain: "service-connect-llf3v2.firebaseapp.com",
-  databaseURL: "https://service-connect-llf3v2-default-rtdb.firebaseio.com",
-  projectId: "service-connect-llf3v2",
-  storageBucket: "service-connect-llf3v2.firebasestorage.app",
-  messagingSenderId: "541838174730",
-  appId: "1:541838174730:web:ce31f125a66b34ca590df3"
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID
 };
 
 const isConfigured = 
