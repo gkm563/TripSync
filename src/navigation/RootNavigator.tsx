@@ -14,7 +14,6 @@ import { RootStackParamList } from './types';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { COLORS } from '../constants/theme';
 import { registerForPushNotificationsAsync } from '../utils/pushNotifications';
-import * as Notifications from 'expo-notifications';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,20 +33,36 @@ export default function RootNavigator() {
         }
       });
 
-      // Listener for foreground notifications
-      const foregroundSubscription = Notifications.addNotificationReceivedListener((notification) => {
-        // Notification received while app is running in foreground
-        console.log('Foreground notification received:', notification.request.content.title);
-      });
+      // Load expo-notifications dynamically if not inside Expo Go
+      let NotificationsInstance: any = null;
+      try {
+        const Constants = require('expo-constants').default;
+        const isExpoGo = Constants?.appOwnership === 'expo';
+        if (!isExpoGo) {
+          NotificationsInstance = require('expo-notifications');
+        }
+      } catch (e) {
+        // Ignore
+      }
 
-      // Listener for background/tapped notifications
-      const responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log('Notification tapped:', response.notification.request.content.title);
-      });
+      let foregroundSubscription: any = null;
+      let responseSubscription: any = null;
+
+      if (NotificationsInstance) {
+        // Listener for foreground notifications
+        foregroundSubscription = NotificationsInstance.addNotificationReceivedListener((notification: any) => {
+          console.log('Foreground notification received:', notification.request.content.title);
+        });
+
+        // Listener for background/tapped notifications
+        responseSubscription = NotificationsInstance.addNotificationResponseReceivedListener((response: any) => {
+          console.log('Notification tapped:', response.notification.request.content.title);
+        });
+      }
 
       return () => {
-        foregroundSubscription.remove();
-        responseSubscription.remove();
+        if (foregroundSubscription) foregroundSubscription.remove();
+        if (responseSubscription) responseSubscription.remove();
       };
     }
   }, [user]);
