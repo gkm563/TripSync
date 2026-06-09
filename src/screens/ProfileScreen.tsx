@@ -3,12 +3,12 @@ import {
   StyleSheet, 
   View, 
   Text, 
-  SafeAreaView, 
   Image, 
   TouchableOpacity, 
   ScrollView,
   Alert
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/authStore';
 import { useTripStore } from '../store/tripStore';
 import { useExpenseStore } from '../store/expenseStore';

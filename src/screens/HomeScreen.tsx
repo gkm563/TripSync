@@ -6,13 +6,13 @@ import {
   FlatList, 
   TouchableOpacity, 
   Image, 
-  SafeAreaView, 
   StatusBar,
   ScrollView,
   Dimensions,
   Platform,
   Alert
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/authStore';
 import { useTripStore } from '../store/tripStore';
 import { useNotificationStore } from '../store/notificationStore';
