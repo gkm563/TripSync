@@ -18,10 +18,10 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   initialize: () => Promise<void>;
-  login: (email: string) => Promise<void>;
+  login: (email: string, password?: string) => Promise<void>;
   logout: () => Promise<void>;
   switchUser: (uid: string) => void;
-  registerUser: (name: string, email: string) => Promise<void>;
+  registerUser: (name: string, email: string, password?: string) => Promise<void>;
   updateFcmToken: (token: string) => Promise<void>;
   updateProfile: (name: string, photoURL: string, upiId?: string, bio?: string) => Promise<void>;
 }
@@ -83,37 +83,27 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      login: async (email: string) => {
+      login: async (email: string, password?: string) => {
         set({ loading: true, error: null });
+        const securePassword = password || 'password123';
         try {
           if (USE_FIREBASE && auth) {
-            // Standard credential flow in production
-            // For email login without password (e.g. sign in with email link or default pwd)
-            const mockPassword = 'password123';
-            try {
-              const credentials = await signInWithEmailAndPassword(auth, email, mockPassword);
-              const userRef = doc(db, 'users', credentials.user.uid);
-              const userSnap = await getDoc(userRef);
-              if (userSnap.exists()) {
-                set({ user: userSnap.data() as User, loading: false });
-              }
-            } catch (err: any) {
-              // Auto-register on login failure in Firebase if email is not found
-              if (err.code === 'auth/user-not-found') {
-                const credentials = await createUserWithEmailAndPassword(auth, email, mockPassword);
-                const newUser: User = {
-                  uid: credentials.user.uid,
-                  name: email.split('@')[0],
-                  email,
-                  photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-                  joinedAt: new Date().toISOString(),
-                  fcmToken: null,
-                };
-                await setDoc(doc(db, 'users', newUser.uid), newUser);
-                set({ user: newUser, loading: false });
-              } else {
-                throw err;
-              }
+            const credentials = await signInWithEmailAndPassword(auth, email, securePassword);
+            const userRef = doc(db, 'users', credentials.user.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              set({ user: userSnap.data() as User, loading: false });
+            } else {
+              const newUser: User = {
+                uid: credentials.user.uid,
+                name: email.split('@')[0],
+                email,
+                photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+                joinedAt: new Date().toISOString(),
+                fcmToken: null,
+              };
+              await setDoc(userRef, newUser);
+              set({ user: newUser, loading: false });
             }
           } else {
             // Mock authentication flow
@@ -140,6 +130,10 @@ export const useAuthStore = create<AuthState>()(
         } catch (err: any) {
           const errorMsg = err.code === 'auth/configuration-not-found'
             ? "Firebase Authentication is disabled or not enabled for Email/Password. Please open Firebase Console -> Build -> Authentication -> Sign-in Method, and enable the 'Email/Password' provider."
+            : err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential'
+            ? "Incorrect email or password. Please try again."
+            : err.code === 'auth/user-not-found'
+            ? "No user found with this email. Please sign up first."
             : err.message;
           set({ error: errorMsg, loading: false });
           throw new Error(errorMsg);
@@ -160,11 +154,12 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      registerUser: async (name: string, email: string) => {
+      registerUser: async (name: string, email: string, password?: string) => {
         set({ loading: true, error: null });
+        const securePassword = password || 'password123';
         try {
           if (USE_FIREBASE && auth) {
-            const credentials = await createUserWithEmailAndPassword(auth, email, 'password123');
+            const credentials = await createUserWithEmailAndPassword(auth, email, securePassword);
             const newUser: User = {
               uid: credentials.user.uid,
               name,
@@ -193,6 +188,10 @@ export const useAuthStore = create<AuthState>()(
         } catch (err: any) {
           const errorMsg = err.code === 'auth/configuration-not-found'
             ? "Firebase Authentication is disabled or not enabled for Email/Password. Please open Firebase Console -> Build -> Authentication -> Sign-in Method, and enable the 'Email/Password' provider."
+            : err.code === 'auth/email-already-in-use'
+            ? "This email is already registered. Please sign in instead."
+            : err.code === 'auth/weak-password'
+            ? "Password should be at least 6 characters long."
             : err.message;
           set({ error: errorMsg, loading: false });
           throw new Error(errorMsg);

@@ -23,6 +23,8 @@ export default function AuthScreen() {
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
 
@@ -30,6 +32,14 @@ export default function AuthScreen() {
   const handleSubmit = async () => {
     if (!email) {
       setValidationError('Email is required');
+      return;
+    }
+    if (!password) {
+      setValidationError('Password is required');
+      return;
+    }
+    if (password.length < 6) {
+      setValidationError('Password must be at least 6 characters');
       return;
     }
     if (isRegister && !name) {
@@ -40,9 +50,9 @@ export default function AuthScreen() {
 
     try {
       if (isRegister) {
-        await registerUser(name, email);
+        await registerUser(name.trim(), email.trim(), password);
       } else {
-        await login(email);
+        await login(email.trim(), password);
       }
     } catch (e: any) {
       // Errors handled by store
@@ -51,6 +61,7 @@ export default function AuthScreen() {
 
   const handleQuickLogin = async (mockEmail: string) => {
     setValidationError(null);
+    setPassword(''); // Reset password field for quick login
     await login(mockEmail);
   };
 
@@ -111,6 +122,31 @@ export default function AuthScreen() {
                 value={email}
                 onChangeText={setEmail}
               />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.passwordInputWrapper}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="At least 6 characters"
+                  placeholderTextColor={COLORS.light.textMuted}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity 
+                  style={styles.eyeButton} 
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff size={18} color={COLORS.light.textSecondary} />
+                  ) : (
+                    <Eye size={18} color={COLORS.light.textSecondary} />
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity 
@@ -342,88 +378,25 @@ const styles = StyleSheet.create({
     color: COLORS.light.textSecondary,
     marginTop: 2,
   },
-  googleButton: {
+  passwordInputWrapper: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: RADIUS.md,
-    paddingVertical: SPACING.md,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: SPACING.lg,
-    gap: SPACING.md,
-    ...SHADOWS.light.sm,
-  },
-  googleIcon: {
-    width: 20,
-    height: 20,
-  },
-  googleButtonText: {
-    color: '#333',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  modalBg: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.xl,
-  },
-  modalCard: {
-    backgroundColor: '#fff',
-    borderRadius: RADIUS.xl,
-    padding: SPACING.xl,
-    width: '100%',
-    ...SHADOWS.light.lg,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.light.text,
-    marginBottom: SPACING.xs,
-  },
-  modalSub: {
-    fontSize: 13,
-    color: COLORS.light.textSecondary,
-    marginBottom: SPACING.lg,
-    lineHeight: 18,
-  },
-  modalInput: {
     borderWidth: 1,
     borderColor: COLORS.light.border,
     borderRadius: RADIUS.md,
+    backgroundColor: COLORS.light.background,
+  },
+  passwordInput: {
+    flex: 1,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     fontSize: 15,
     color: COLORS.light.text,
-    backgroundColor: COLORS.light.background,
-    marginBottom: SPACING.lg,
   },
-  modalActionRow: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-  },
-  modalBtn: {
-    flex: 1,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.md,
-    alignItems: 'center',
+  eyeButton: {
+    paddingHorizontal: SPACING.md,
+    height: '100%',
     justifyContent: 'center',
-  },
-  modalCancelBtn: {
-    backgroundColor: COLORS.light.background,
-    borderWidth: 1,
-    borderColor: COLORS.light.border,
-  },
-  modalCancelText: {
-    color: COLORS.light.textSecondary,
-    fontWeight: '500',
-  },
-  modalSubmitBtn: {
-    backgroundColor: COLORS.light.primary,
-  },
-  modalSubmitText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    alignItems: 'center',
   },
 });
