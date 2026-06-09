@@ -9,6 +9,7 @@ import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import { Home, Calendar, PlusCircle, CheckSquare, User } from 'lucide-react-native';
 import { View, Alert, StyleSheet } from 'react-native';
 import { useTripStore } from '../store/tripStore';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -17,6 +18,7 @@ const QuickAddPlaceholder = () => null;
 
 export default function MainTabs() {
   const { trips } = useTripStore();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -27,8 +29,8 @@ export default function MainTabs() {
         tabBarStyle: {
           borderTopWidth: 1,
           borderColor: COLORS.light.border,
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + (insets.bottom > 0 ? insets.bottom - 4 : 0),
+          paddingBottom: insets.bottom > 0 ? insets.bottom - 4 : 8,
           paddingTop: 8,
           backgroundColor: '#fff',
         },
