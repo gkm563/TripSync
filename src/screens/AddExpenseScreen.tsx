@@ -1,0 +1,719 @@
+import React, { useState } from 'react';
+import { 
+  StyleSheet, 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  ScrollView, 
+  SafeAreaView, 
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  Modal
+} from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as zod from 'zod';
+import { useAuthStore } from '../store/authStore';
+import { useTripStore } from '../store/tripStore';
+import { useExpenseStore } from '../store/expenseStore';
+import { useNotificationStore } from '../store/notificationStore';
+import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../constants/theme';
+import { ChevronLeft, Info, HelpCircle, User, AlertTriangle } from 'lucide-react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
+
+const expenseSchema = zod.object({
+  title: zod.string().min(3, 'Title must be at least 3 characters'),
+  amount: zod.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+    message: 'Amount must be a positive number',
+  }),
+  category: zod.enum(['Food', 'Travel', 'Hotel', 'Shopping', 'Other']),
+  date: zod.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD format'),
+  time: zod.string().regex(/^\d{2}:\d{2}$/, 'Use HH:mm format'),
+  notes: zod.string().optional(),
+});
+
+type ExpenseFormData = zod.infer<typeof expenseSchema>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'AddExpense'>;
+type RouteProps = RouteProp<RootStackParamList, 'AddExpense'>;
+
+export default function AddExpenseScreen() {
+  const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<RouteProps>();
+  const { tripId } = route.params;
+
+  const { user, usersList } = useAuthStore();
+  const { trips } = useTripStore();
+  const { addExpense, checkForDuplicates } = useExpenseStore();
+  const { addNotification } = useNotificationStore();
+
+  const trip = trips.find(t => t.id === tripId);
+  const activeMembers = usersList.filter(u => trip?.members.includes(u.uid));
+
+  // Payer Mode: 'single' | 'multiple'
+  const [payerMode, setPayerMode] = useState<'single' | 'multiple'>('single');
+  const [singlePayerId, setSinglePayerId] = useState(user?.uid || '');
+  const [multiplePayers, setMultiplePayers] = useState<Record<string, string>>({});
+
+  // Duplicate Warning Modal
+  const [duplicateModalVisible, setDuplicateModalVisible] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<ExpenseFormData | null>(null);
+
+  const { control, handleSubmit, watch, formState: { errors } } = useForm<ExpenseFormData>({
+    resolver: zodResolver(expenseSchema),
+    defaultValues: {
+      title: '',
+      amount: '',
+      category: 'Food',
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('en-US', { hour12: false }).slice(0, 5),
+      notes: '',
+    }
+  });
+
+  const watchAmount = watch('amount');
+
+  if (!trip) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text>Trip not found.</Text>
+      </SafeAreaView>
+    );
+  }
+
+  // Handle payer contribution input changes in multiple mode
+  const handleMultiplePayerChange = (uid: string, text: string) => {
+    setMultiplePayers(prev => ({
+      ...prev,
+      [uid]: text
+    }));
+  };
+
+  const processAddExpense = async (data: ExpenseFormData) => {
+    if (!user) return;
+
+    // 1. Calculate Payer Record
+    const totalAmount = parseFloat(data.amount);
+    let paidBy: Record<string, number> = {};
+
+    if (payerMode === 'single') {
+      paidBy[singlePayerId] = totalAmount;
+    } else {
+      // Multiple payers mode
+      let calculatedSum = 0;
+      activeMembers.forEach((m) => {
+        const amt = parseFloat(multiplePayers[m.uid] || '0');
+        if (amt > 0) {
+          paidBy[m.uid] = amt;
+          calculatedSum += amt;
+        }
+      });
+
+      // Verify sum matches total expense
+      if (Math.abs(calculatedSum - totalAmount) > 0.01) {
+        Alert.alert(
+          'Payer Total Mismatch', 
+          `The sum of member contributions (₹${calculatedSum}) does not equal the total expense amount (₹${totalAmount}).`
+        );
+        return;
+      }
+    }
+
+    try {
+      const { expense } = await addExpense(
+        tripId,
+        data.title,
+        totalAmount,
+        data.category,
+        paidBy,
+        user.uid,
+        user.name,
+        data.date,
+        data.time,
+        data.notes || '',
+        trip.members.length
+      );
+
+      // Create realtime FCM/In-App notifications for all members
+      const otherMembers = trip.members.filter(uid => uid !== user.uid);
+      otherMembers.forEach(async (memberId) => {
+        await addNotification(
+          memberId,
+          'New Expense Added',
+          `${user.name} added "${data.title}" (₹${totalAmount}) to "${trip.name}"`,
+          'expense_created',
+          tripId,
+          expense.id
+        );
+      });
+
+      navigation.goBack();
+    } catch (e: any) {
+      Alert.alert('Error', e.message || 'Failed to add expense');
+    }
+  };
+
+  const onSubmit = (data: ExpenseFormData) => {
+    // Check for duplicates
+    const isDuplicate = checkForDuplicates(tripId, data.title, parseFloat(data.amount), data.category);
+
+    if (isDuplicate) {
+      setPendingFormData(data);
+      setDuplicateModalVisible(true);
+    } else {
+      processAddExpense(data);
+    }
+  };
+
+  const handleConfirmDuplicate = () => {
+    setDuplicateModalVisible(false);
+    if (pendingFormData) {
+      processAddExpense(pendingFormData);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ChevronLeft size={24} color={COLORS.light.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Add Expense</Text>
+          <View style={{ width: 40 }} />
+        </View>
+
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.formCard}>
+            
+            {/* Title */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Expense Name / Title</Text>
+              <Controller
+                control={control}
+                name="title"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={[styles.input, errors.title && styles.errorInput]}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="e.g. Train Ticket, Hotel Dinner"
+                    placeholderTextColor={COLORS.light.textMuted}
+                  />
+                )}
+              />
+              {errors.title && <Text style={styles.errorText}>{errors.title.message}</Text>}
+            </View>
+
+            {/* Amount & Category */}
+            <View style={styles.row}>
+              <View style={[styles.inputGroup, { flex: 1 }]}>
+                <Text style={styles.label}>Total Amount (₹)</Text>
+                <Controller
+                  control={control}
+                  name="amount"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[styles.input, errors.amount && styles.errorInput]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      keyboardType="numeric"
+                      placeholder="e.g. 1500"
+                      placeholderTextColor={COLORS.light.textMuted}
+                    />
+                  )}
+                />
+                {errors.amount && <Text style={styles.errorText}>{errors.amount.message}</Text>}
+              </View>
+
+              <View style={[styles.inputGroup, { flex: 1.2 }]}>
+                <Text style={styles.label}>Category</Text>
+                <Controller
+                  control={control}
+                  name="category"
+                  render={({ field: { onChange, value } }) => (
+                    <View style={styles.categoryPickerRow}>
+                      {['Food', 'Travel', 'Hotel', 'Shopping', 'Other'].slice(0, 3).map((cat) => (
+                        <TouchableOpacity
+                          key={cat}
+                          style={[styles.pickerTag, value === cat && styles.pickerTagActive]}
+                          onPress={() => onChange(cat)}
+                        >
+                          <Text style={[styles.pickerTagText, value === cat && styles.pickerTagTextActive]}>{cat}</Text>
+                        </TouchableOpacity>
+                      ))}
+                      <TouchableOpacity
+                        style={[styles.pickerTag, (value === 'Shopping' || value === 'Other') && styles.pickerTagActive]}
+                        onPress={() => onChange(value === 'Shopping' ? 'Other' : 'Shopping')}
+                      >
+                        <Text style={[styles.pickerTagText, (value === 'Shopping' || value === 'Other') && styles.pickerTagTextActive]}>
+                          {value === 'Shopping' ? 'Shop' : value === 'Other' ? 'Other' : 'More'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                />
+              </View>
+            </View>
+
+            {/* Payer Configuration */}
+            <View style={styles.payerHeader}>
+              <Text style={styles.label}>Paid By</Text>
+              <View style={styles.payerModeToggle}>
+                <TouchableOpacity
+                  style={[styles.toggleBtn, payerMode === 'single' && styles.toggleBtnActive]}
+                  onPress={() => setPayerMode('single')}
+                >
+                  <Text style={[styles.toggleBtnText, payerMode === 'single' && styles.toggleBtnTextActive]}>Single</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.toggleBtn, payerMode === 'multiple' && styles.toggleBtnActive]}
+                  onPress={() => setPayerMode('multiple')}
+                >
+                  <Text style={[styles.toggleBtnText, payerMode === 'multiple' && styles.toggleBtnTextActive]}>Multiple</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {payerMode === 'single' ? (
+              <View style={styles.singlePayerBox}>
+                <Text style={styles.descriptionLabel}>Select Who Paid:</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.payerList}>
+                  {activeMembers.map((member) => (
+                    <TouchableOpacity
+                      key={member.uid}
+                      style={[
+                        styles.payerCard, 
+                        singlePayerId === member.uid && styles.payerCardActive
+                      ]}
+                      onPress={() => setSinglePayerId(member.uid)}
+                    >
+                      <User size={18} color={singlePayerId === member.uid ? '#fff' : COLORS.light.textSecondary} />
+                      <Text style={[styles.payerCardText, singlePayerId === member.uid && styles.payerCardTextActive]}>
+                        {member.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : (
+              <View style={styles.multiplePayerBox}>
+                <Text style={styles.descriptionLabel}>Enter Contribution for each member (Total sum must be ₹{watchAmount || '0'}):</Text>
+                {activeMembers.map((member) => (
+                  <View key={member.uid} style={styles.multiplePayerRow}>
+                    <Text style={styles.memberNameLabel}>{member.name}</Text>
+                    <TextInput
+                      style={styles.multiplePayerInput}
+                      placeholder="₹0"
+                      keyboardType="numeric"
+                      value={multiplePayers[member.uid] || ''}
+                      onChangeText={(txt) => handleMultiplePayerChange(member.uid, txt)}
+                    />
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Date & Time */}
+            <View style={styles.row}>
+              <View style={[styles.inputGroup, { flex: 1 }]}>
+                <Text style={styles.label}>Date</Text>
+                <Controller
+                  control={control}
+                  name="date"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[styles.input, errors.date && styles.errorInput]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder="YYYY-MM-DD"
+                      placeholderTextColor={COLORS.light.textMuted}
+                    />
+                  )}
+                />
+                {errors.date && <Text style={styles.errorText}>{errors.date.message}</Text>}
+              </View>
+
+              <View style={[styles.inputGroup, { flex: 1 }]}>
+                <Text style={styles.label}>Time</Text>
+                <Controller
+                  control={control}
+                  name="time"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[styles.input, errors.time && styles.errorInput]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder="HH:mm"
+                      placeholderTextColor={COLORS.light.textMuted}
+                    />
+                  )}
+                />
+                {errors.time && <Text style={styles.errorText}>{errors.time.message}</Text>}
+              </View>
+            </View>
+
+            {/* Notes */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Notes (Optional)</Text>
+              <Controller
+                control={control}
+                name="notes"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={[styles.input, styles.textArea]}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="Provide context like merchant, invoice info, or splitting exceptions."
+                    placeholderTextColor={COLORS.light.textMuted}
+                    multiline
+                    numberOfLines={3}
+                  />
+                )}
+              />
+            </View>
+
+            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit(onSubmit)}>
+              <Text style={styles.submitBtnText}>Submit Expense</Text>
+            </TouchableOpacity>
+
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Duplicate Warning Dialog */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={duplicateModalVisible}
+        onRequestClose={() => setDuplicateModalVisible(false)}
+      >
+        <View style={styles.modalBg}>
+          <View style={styles.modalCard}>
+            <View style={styles.warningIconHeader}>
+              <AlertTriangle size={32} color={COLORS.light.warning} />
+              <Text style={styles.modalTitle}>Potential Duplicate Found</Text>
+            </View>
+            <Text style={styles.modalSub}>
+              A similar expense with the same amount and category was created in this trip within the last 10 minutes.
+            </Text>
+            <Text style={styles.modalNotice}>
+              Do you want to continue creating this expense anyway or cancel to review?
+            </Text>
+            <View style={styles.modalActionRow}>
+              <TouchableOpacity 
+                style={[styles.modalBtn, styles.modalCancelBtn]} 
+                onPress={() => setDuplicateModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.modalBtn, styles.modalSubmitBtn]} 
+                onPress={handleConfirmDuplicate}
+              >
+                <Text style={styles.modalSubmitText}>Continue</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.light.background,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: RADIUS.round,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+  },
+  scrollContent: {
+    padding: SPACING.md,
+  },
+  formCard: {
+    backgroundColor: '#fff',
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    ...SHADOWS.light.md,
+    marginBottom: 40,
+  },
+  inputGroup: {
+    marginBottom: SPACING.md,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.light.textSecondary,
+    marginBottom: SPACING.xs,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    fontSize: 15,
+    color: COLORS.light.text,
+    backgroundColor: COLORS.light.background,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  errorInput: {
+    borderColor: COLORS.light.error,
+  },
+  errorText: {
+    color: COLORS.light.error,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  categoryPickerRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  pickerTag: {
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: RADIUS.xs,
+  },
+  pickerTagActive: {
+    backgroundColor: COLORS.light.primary,
+    borderColor: COLORS.light.primary,
+  },
+  pickerTagText: {
+    fontSize: 11,
+    color: COLORS.light.textSecondary,
+    fontWeight: '500',
+  },
+  pickerTagTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  payerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
+  },
+  payerModeToggle: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.light.background,
+    borderRadius: RADIUS.xs,
+    padding: 2,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  toggleBtn: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 4,
+    borderRadius: RADIUS.xs,
+  },
+  toggleBtnActive: {
+    backgroundColor: COLORS.light.primary,
+  },
+  toggleBtnText: {
+    fontSize: 11,
+    color: COLORS.light.textSecondary,
+  },
+  toggleBtnTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  singlePayerBox: {
+    backgroundColor: COLORS.light.background,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  descriptionLabel: {
+    fontSize: 11,
+    color: COLORS.light.textSecondary,
+    marginBottom: SPACING.sm,
+  },
+  payerList: {
+    gap: SPACING.xs,
+  },
+  payerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginRight: 4,
+  },
+  payerCardActive: {
+    backgroundColor: COLORS.light.primary,
+    borderColor: COLORS.light.primary,
+  },
+  payerCardText: {
+    fontSize: 12,
+    color: COLORS.light.textSecondary,
+  },
+  payerCardTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  multiplePayerBox: {
+    backgroundColor: COLORS.light.background,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  multiplePayerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  memberNameLabel: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: COLORS.light.text,
+  },
+  multiplePayerInput: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.xs,
+    width: 100,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    textAlign: 'right',
+    fontSize: 13,
+  },
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  submitBtn: {
+    backgroundColor: COLORS.light.primary,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.md,
+    ...SHADOWS.light.md,
+  },
+  submitBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalBg: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.xl,
+  },
+  modalCard: {
+    backgroundColor: '#fff',
+    borderRadius: RADIUS.xl,
+    padding: SPACING.xl,
+    width: '100%',
+    ...SHADOWS.light.lg,
+  },
+  warningIconHeader: {
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+  },
+  modalSub: {
+    fontSize: 13,
+    color: COLORS.light.textSecondary,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: SPACING.sm,
+  },
+  modalNotice: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: SPACING.lg,
+  },
+  modalActionRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCancelBtn: {
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  modalCancelText: {
+    color: COLORS.light.textSecondary,
+    fontWeight: '500',
+  },
+  modalSubmitBtn: {
+    backgroundColor: COLORS.light.warning,
+  },
+  modalSubmitText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+});
