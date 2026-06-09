@@ -31,21 +31,13 @@ if (USE_FIREBASE) {
       auth = initializeAuth(app, {
         persistence: getReactNativePersistence(AsyncStorage),
       });
-      db = initializeFirestore(app, {
-        localCache: persistentLocalCache({
-          tabManager: persistentMultipleTabManager(),
-        }),
-      });
+      db = initializeFirestore(app, {});
     } else {
       app = getApp();
       auth = initializeAuth(app, {
         persistence: getReactNativePersistence(AsyncStorage),
       });
-      db = initializeFirestore(app, {
-        localCache: persistentLocalCache({
-          tabManager: persistentMultipleTabManager(),
-        }),
-      });
+      db = initializeFirestore(app, {});
     }
   } catch (error) {
     console.warn("Failed to initialize Firebase:", error);
