@@ -441,6 +441,8 @@ export const useExpenseStore = create<ExpenseState>()(
               list.push(docSnap.data() as Expense);
             });
             set({ expenses: list });
+          }, (error) => {
+            console.warn("Firestore snapshot listener error (expenses):", error);
           });
           return unsubscribe;
         }
@@ -460,6 +462,8 @@ export const useExpenseStore = create<ExpenseState>()(
               list.push(docSnap.data() as PersonalExpense);
             });
             set({ personalExpenses: list });
+          }, (error) => {
+            console.warn("Firestore snapshot listener error (personalExpenses):", error);
           });
           return unsubscribe;
         }
@@ -477,6 +481,8 @@ export const useExpenseStore = create<ExpenseState>()(
             // Sort by createdAt descending
             list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             set({ activityLogs: list });
+          }, (error) => {
+            console.warn("Firestore snapshot listener error (activityLogs):", error);
           });
           return unsubscribe;
         }

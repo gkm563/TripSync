@@ -206,7 +206,7 @@ export const useNotificationStore = create<NotificationState>()(
           const unsubscribe = onSnapshot(q, (snapshot) => {
             const list: Notification[] = [];
             snapshot.forEach((docSnap) => {
-              list.push(docSnap.data() as Notification);
+              docSnap.exists() && list.push(docSnap.data() as Notification);
             });
             // Sort by createdAt descending
             list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -220,6 +220,8 @@ export const useNotificationStore = create<NotificationState>()(
               unreadCount: list.filter((n) => n.status === 'unread').length,
               activeBanner: newUnreads.length > 0 ? newUnreads[0] : get().activeBanner,
             });
+          }, (error) => {
+            console.warn("Firestore snapshot listener error (notifications):", error);
           });
           return unsubscribe;
         }

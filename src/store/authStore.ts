@@ -44,6 +44,8 @@ export const useAuthStore = create<AuthState>()(
             if (users.length > 0) {
               set({ usersList: users });
             }
+          }, (error) => {
+            console.warn("Firestore snapshot listener error (users):", error);
           });
         }
 

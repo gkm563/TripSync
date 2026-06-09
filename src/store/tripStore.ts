@@ -287,6 +287,8 @@ export const useTripStore = create<TripState>()(
             } else {
               set({ trips: tripsList, databaseWipedWarning: false });
             }
+          }, (error) => {
+            console.warn("Firestore snapshot listener error (trips):", error);
           });
           return unsubscribe;
         } else {
@@ -328,6 +330,8 @@ export const useTripStore = create<TripState>()(
               invs.push(docSnap.data() as TripMemberInvitation);
             });
             set({ invitations: invs });
+          }, (error) => {
+            console.warn("Firestore snapshot listener error (invitations):", error);
           });
           return unsubscribe;
         }
