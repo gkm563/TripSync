@@ -3,14 +3,15 @@ import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Placeholder firebase credentials
+// Firebase credentials
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyC-1DJV2HIuQSb0bWxmOsmpn0h-zmVn-pc",
+  authDomain: "service-connect-llf3v2.firebaseapp.com",
+  databaseURL: "https://service-connect-llf3v2-default-rtdb.firebaseio.com",
+  projectId: "service-connect-llf3v2",
+  storageBucket: "service-connect-llf3v2.firebasestorage.app",
+  messagingSenderId: "541838174730",
+  appId: "1:541838174730:web:ce31f125a66b34ca590df3"
 };
 
 const isConfigured = 
