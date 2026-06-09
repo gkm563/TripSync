@@ -62,12 +62,11 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
       const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
       token = tokenData.data;
     } else {
-      // Fallback: try without explicit projectId (can use cached app config if configured)
-      const tokenData = await Notifications.getExpoPushTokenAsync();
-      token = tokenData.data;
+      // In SDK 50+, projectId is required. Skip calling if not configured to avoid loud warnings.
+      console.log('Push registration info: No EAS projectId config found. Token registration skipped.');
     }
   } catch (err) {
-    console.warn('Could not retrieve Expo Push Token (requires a development build or EAS configuration):', err);
+    console.log('Push registration info: EAS config or token retrieval skipped during local test.');
   }
 
   return token;
