@@ -10,7 +10,8 @@ import {
   KeyboardAvoidingView, 
   Platform,
   ScrollView,
-  Alert
+  Alert,
+  Modal
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../store/authStore';
@@ -25,28 +26,11 @@ export default function AuthScreen() {
   const [email, setEmail] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  const [googleModalVisible, setGoogleModalVisible] = useState(false);
+  const [googleEmailInput, setGoogleEmailInput] = useState('');
+
   const handleGoogleLogin = () => {
-    Alert.prompt(
-      'Google Sign In',
-      'Please enter your Google Email address:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign In',
-          onPress: async (googleEmail) => {
-            if (!googleEmail || !googleEmail.includes('@')) {
-              Alert.alert('Error', 'Please enter a valid Google email address.');
-              return;
-            }
-            try {
-              await login(googleEmail);
-            } catch (e: any) {
-              Alert.alert('Sign In Failed', e.message || 'Failed to sign in with Google');
-            }
-          }
-        }
-      ]
-    );
+    setGoogleModalVisible(true);
   };
 
   const handleSubmit = async () => {
@@ -199,6 +183,66 @@ export default function AuthScreen() {
             </TouchableOpacity>
           )}
         </ScrollView>
+
+        {/* Google Login Fallback Modal */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={googleModalVisible}
+          onRequestClose={() => {
+            setGoogleModalVisible(false);
+            setGoogleEmailInput('');
+          }}
+        >
+          <View style={styles.modalBg}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>Google Sign In</Text>
+              <Text style={styles.modalSub}>
+                Enter your Google Email address to simulate sign in:
+              </Text>
+              
+              <TextInput
+                style={styles.modalInput}
+                placeholder="e.g. gautam@gmail.com"
+                placeholderTextColor={COLORS.light.textMuted}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={googleEmailInput}
+                onChangeText={setGoogleEmailInput}
+              />
+
+              <View style={styles.modalActionRow}>
+                <TouchableOpacity 
+                  style={[styles.modalBtn, styles.modalCancelBtn]} 
+                  onPress={() => {
+                    setGoogleModalVisible(false);
+                    setGoogleEmailInput('');
+                  }}
+                >
+                  <Text style={styles.modalCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.modalBtn, styles.modalSubmitBtn]} 
+                  onPress={async () => {
+                    if (!googleEmailInput || !googleEmailInput.includes('@')) {
+                      Alert.alert('Error', 'Please enter a valid Google email address.');
+                      return;
+                    }
+                    setGoogleModalVisible(false);
+                    try {
+                      await login(googleEmailInput);
+                      setGoogleEmailInput('');
+                    } catch (e: any) {
+                      Alert.alert('Sign In Failed', e.message || 'Failed to sign in with Google');
+                    }
+                  }}
+                >
+                  <Text style={styles.modalSubmitText}>Sign In</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </LinearGradient>
   );
@@ -391,6 +435,70 @@ const styles = StyleSheet.create({
   googleButtonText: {
     color: '#333',
     fontSize: 15,
+    fontWeight: 'bold',
+  },
+  modalBg: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.xl,
+  },
+  modalCard: {
+    backgroundColor: '#fff',
+    borderRadius: RADIUS.xl,
+    padding: SPACING.xl,
+    width: '100%',
+    ...SHADOWS.light.lg,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+    marginBottom: SPACING.xs,
+  },
+  modalSub: {
+    fontSize: 13,
+    color: COLORS.light.textSecondary,
+    marginBottom: SPACING.lg,
+    lineHeight: 18,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    fontSize: 15,
+    color: COLORS.light.text,
+    backgroundColor: COLORS.light.background,
+    marginBottom: SPACING.lg,
+  },
+  modalActionRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCancelBtn: {
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  modalCancelText: {
+    color: COLORS.light.textSecondary,
+    fontWeight: '500',
+  },
+  modalSubmitBtn: {
+    backgroundColor: COLORS.light.primary,
+  },
+  modalSubmitText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
 });
