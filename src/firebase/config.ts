@@ -32,20 +32,20 @@ if (USE_FIREBASE) {
       app = getApp();
     }
 
-    // Safely retrieve or initialize Auth
+    // Safely initialize or retrieve Auth
     try {
-      auth = getAuth(app);
-    } catch (authErr) {
       auth = initializeAuth(app, {
         persistence: getReactNativePersistence(AsyncStorage),
       });
+    } catch (authErr) {
+      auth = getAuth(app);
     }
 
-    // Safely retrieve or initialize Firestore
+    // Safely initialize or retrieve Firestore
     try {
-      db = getFirestore(app);
-    } catch (dbErr) {
       db = initializeFirestore(app, {});
+    } catch (dbErr) {
+      db = getFirestore(app);
     }
   } catch (error) {
     console.warn("Failed to initialize Firebase App:", error);
