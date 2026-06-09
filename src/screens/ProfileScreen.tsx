@@ -19,7 +19,8 @@ import { useTripStore } from '../store/tripStore';
 import { useExpenseStore } from '../store/expenseStore';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../constants/theme';
 import { LogOut, RefreshCw, User, ShieldAlert, Award, TrendingUp, Edit3, CreditCard, Check } from 'lucide-react-native';
-import { USE_FIREBASE } from '../firebase/config';
+import { USE_FIREBASE, app } from '../firebase/config';
+import * as ImagePicker from 'expo-image-picker';
 
 const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
@@ -29,6 +30,22 @@ const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
   'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
 ];
+
+// Helper function to reliably convert file URIs to Blobs on React Native
+const uriToBlob = (uri: string): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function () {
+      reject(new Error('Failed to convert image URI to blob'));
+    };
+    xhr.responseType = 'blob';
+    xhr.open('GET', uri, true);
+    xhr.send(null);
+  });
+};
 
 export default function ProfileScreen() {
   const { user, usersList, switchUser, logout, updateProfile } = useAuthStore();
@@ -41,17 +58,18 @@ export default function ProfileScreen() {
   const [editUpiId, setEditUpiId] = useState('');
   const [editBio, setEditBio] = useState('');
   const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
 
   if (!user) return null;
 
-  // Calculate statistics
-  const userTrips = trips.filter(t => t.members.includes(user.uid));
+  // Calculate statistics with safe guards against undefined arrays/objects
+  const userTrips = trips.filter(t => t.members && t.members.includes(user.uid));
   const activeTripsCount = userTrips.filter(t => t.status === 'active').length;
   
-  // Sum user contributions in all approved expenses
+  // Sum user contributions safely in all approved expenses
   let totalContributed = 0;
   expenses.forEach((exp) => {
-    if (exp.status === 'approved' && exp.paidBy[user.uid]) {
+    if (exp.status === 'approved' && exp.paidBy && exp.paidBy[user.uid]) {
       totalContributed += exp.paidBy[user.uid];
     }
   });
@@ -67,6 +85,56 @@ export default function ProfileScreen() {
     setEditUpiId(user.upiId || '');
     setEditBio(user.bio || '');
     setEditModalVisible(true);
+  };
+
+  const handlePickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'We need photo library access to change your profile picture!');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0].uri) {
+        const localUri = result.assets[0].uri;
+        
+        if (USE_FIREBASE && app) {
+          setImageUploading(true);
+          try {
+            // Dynamically load firebase/storage to prevent import conflicts
+            const { getStorage, ref, uploadBytes, getDownloadURL } = require('firebase/storage');
+            const storage = getStorage(app);
+            
+            const blob = await uriToBlob(localUri);
+            const fileRef = ref(storage, `avatars/${user.uid}_${Date.now()}`);
+            await uploadBytes(fileRef, blob);
+            
+            const downloadURL = await getDownloadURL(fileRef);
+            setEditPhotoURL(downloadURL);
+          } catch (uploadErr: any) {
+            console.warn('Firebase Storage upload failed, using local URI:', uploadErr);
+            setEditPhotoURL(localUri);
+            Alert.alert(
+              'Upload Warning',
+              'Profile picture saved locally. (Enable Firebase Storage in your console if you want others to see it).'
+            );
+          } finally {
+            setImageUploading(false);
+          }
+        } else {
+          setEditPhotoURL(localUri);
+        }
+      }
+    } catch (err: any) {
+      Alert.alert('Error', 'Failed to pick image: ' + err.message);
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -98,7 +166,12 @@ export default function ProfileScreen() {
         
         {/* Profile Card */}
         <View style={styles.profileCard}>
-          <Image source={{ uri: user.photoURL }} style={styles.avatar} />
+          <View style={styles.avatarContainer}>
+            <Image source={{ uri: user.photoURL }} style={styles.avatar} />
+            <TouchableOpacity style={styles.avatarEditOverlay} onPress={handleOpenEdit}>
+              <Edit3 size={12} color="#fff" />
+            </TouchableOpacity>
+          </View>
           
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
@@ -110,7 +183,7 @@ export default function ProfileScreen() {
           )}
 
           <View style={styles.upiBadge}>
-            <CreditCard size={12} color={COLORS.light.textMuted} />
+            <CreditCard size={12} color={COLORS.light.textSecondary} />
             <Text style={styles.upiText} numberOfLines={1}>
               {user.upiId || 'No UPI ID configured'}
             </Text>
@@ -210,10 +283,23 @@ export default function ProfileScreen() {
             <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
               <Text style={styles.modalTitle}>Edit Profile Settings</Text>
 
-              {/* Preview Selected Avatar */}
+              {/* Preview Selected Avatar & Gallery Trigger */}
               <View style={styles.avatarPreviewContainer}>
-                <Image source={{ uri: editPhotoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' }} style={styles.previewAvatar} />
-                <Text style={styles.previewLabel}>Profile Picture Preview</Text>
+                <TouchableOpacity style={styles.previewAvatarWrapper} onPress={handlePickImage} disabled={imageUploading}>
+                  <Image source={{ uri: editPhotoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' }} style={styles.previewAvatar} />
+                  {imageUploading ? (
+                    <View style={styles.previewAvatarOverlay}>
+                      <ActivityIndicator size="small" color="#fff" />
+                    </View>
+                  ) : (
+                    <View style={styles.previewAvatarOverlay}>
+                      <Edit3 size={16} color="#fff" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.galleryBtn} onPress={handlePickImage} disabled={imageUploading}>
+                  <Text style={styles.galleryBtnText}>Choose from Gallery</Text>
+                </TouchableOpacity>
               </View>
 
               {/* Name Input */}
@@ -298,7 +384,7 @@ export default function ProfileScreen() {
                 <TouchableOpacity 
                   style={[styles.modalBtn, styles.cancelBtn]}
                   onPress={() => setEditModalVisible(false)}
-                  disabled={saving}
+                  disabled={saving || imageUploading}
                 >
                   <Text style={styles.cancelBtnText}>Cancel</Text>
                 </TouchableOpacity>
@@ -306,7 +392,7 @@ export default function ProfileScreen() {
                 <TouchableOpacity 
                   style={[styles.modalBtn, styles.saveBtn]}
                   onPress={handleSaveProfile}
-                  disabled={saving}
+                  disabled={saving || imageUploading}
                 >
                   {saving ? (
                     <ActivityIndicator size="small" color="#fff" />
@@ -342,13 +428,30 @@ const styles = StyleSheet.create({
     borderColor: COLORS.light.border,
     ...SHADOWS.light.sm,
   },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: SPACING.sm,
+  },
   avatar: {
     width: 90,
     height: 90,
     borderRadius: RADIUS.round,
-    marginBottom: SPACING.sm,
     borderWidth: 3,
     borderColor: COLORS.light.primary,
+  },
+  avatarEditOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: COLORS.light.primary,
+    borderRadius: RADIUS.round,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+    ...SHADOWS.light.sm,
   },
   name: {
     fontSize: 22,
@@ -572,17 +675,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.lg,
   },
+  previewAvatarWrapper: {
+    position: 'relative',
+    marginBottom: SPACING.xs,
+  },
   previewAvatar: {
-    width: 70,
-    height: 70,
+    width: 80,
+    height: 80,
     borderRadius: RADIUS.round,
     borderWidth: 2,
     borderColor: COLORS.light.primary,
-    marginBottom: 6,
   },
-  previewLabel: {
+  previewAvatarOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: RADIUS.round,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  galleryBtn: {
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.round,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 4,
+    marginTop: 6,
+  },
+  galleryBtnText: {
     fontSize: 11,
-    color: COLORS.light.textMuted,
+    color: COLORS.light.primary,
+    fontWeight: 'bold',
   },
   inputGroup: {
     marginBottom: SPACING.md,
