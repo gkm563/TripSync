@@ -11,6 +11,10 @@ import {
   GoogleAuthProvider,
   signInWithCredential
 } from 'firebase/auth';
+import { useTripStore } from './tripStore';
+import { useExpenseStore } from './expenseStore';
+import { useNotificationStore } from './notificationStore';
+
 
 interface AuthState {
   user: User | null;
@@ -142,8 +146,22 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         if (USE_FIREBASE && auth) {
-          await signOut(auth);
+          try {
+            await signOut(auth);
+          } catch (e) {
+            console.warn("Failed to sign out from Firebase:", e);
+          }
         }
+        
+        // Reset/clear all cached data on logout to avoid data contamination
+        try {
+          useTripStore.getState().clearData();
+          useExpenseStore.getState().clearData();
+          useNotificationStore.getState().clearData();
+        } catch (clearErr) {
+          console.warn("Failed to clear local stores on logout:", clearErr);
+        }
+
         set({ user: null });
       },
 

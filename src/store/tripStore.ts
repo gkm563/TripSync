@@ -53,6 +53,7 @@ interface TripState {
   // Database health safeguard helpers
   confirmResetLocalData: () => void;
   dismissWipedWarning: () => void;
+  clearData: () => void;
 }
 
 export const useTripStore = create<TripState>()(
@@ -354,6 +355,10 @@ export const useTripStore = create<TripState>()(
 
       dismissWipedWarning: () => {
         set({ databaseWipedWarning: false });
+      },
+
+      clearData: () => {
+        set({ trips: [], invitations: [], databaseWipedWarning: false });
       },
     }),
     {

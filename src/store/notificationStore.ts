@@ -39,6 +39,7 @@ interface NotificationState {
   clearHistory: (userId: string) => Promise<void>;
   syncNotifications: (userId: string) => () => void;
   hideBanner: () => void;
+  clearData: () => void;
 }
 
 export const useNotificationStore = create<NotificationState>()(
@@ -226,6 +227,10 @@ export const useNotificationStore = create<NotificationState>()(
           return unsubscribe;
         }
         return () => {};
+      },
+
+      clearData: () => {
+        set({ notifications: [], unreadCount: 0, activeBanner: null });
       },
     }),
     {

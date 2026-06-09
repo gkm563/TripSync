@@ -93,6 +93,7 @@ interface ExpenseState {
   syncExpenses: (tripId: string) => () => void;
   syncPersonalExpenses: (tripId: string, userId: string) => () => void;
   syncActivityLogs: (tripId: string) => () => void;
+  clearData: () => void;
 }
 
 export const useExpenseStore = create<ExpenseState>()(
@@ -487,6 +488,10 @@ export const useExpenseStore = create<ExpenseState>()(
           return unsubscribe;
         }
         return () => {};
+      },
+
+      clearData: () => {
+        set({ expenses: [], personalExpenses: [], expenseVersions: [], activityLogs: [] });
       },
     }),
     {

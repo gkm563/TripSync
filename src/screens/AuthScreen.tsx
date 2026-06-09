@@ -294,11 +294,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   input: {
+    height: 48,
     borderWidth: 1,
     borderColor: COLORS.light.border,
     borderRadius: RADIUS.md,
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
     fontSize: 15,
     color: COLORS.light.text,
     backgroundColor: COLORS.light.background,
@@ -381,6 +381,7 @@ const styles = StyleSheet.create({
   passwordInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
+    height: 48,
     borderWidth: 1,
     borderColor: COLORS.light.border,
     borderRadius: RADIUS.md,
@@ -388,8 +389,8 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     flex: 1,
+    height: '100%',
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
     fontSize: 15,
     color: COLORS.light.text,
   },
