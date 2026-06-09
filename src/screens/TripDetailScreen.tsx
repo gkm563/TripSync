@@ -134,7 +134,7 @@ export default function TripDetailScreen() {
       await inviteMember(tripId, inviteEmail, user);
       
       // Simulate real-time notification to the invited user
-      const targetUser = usersList.find(u => u.email.toLowerCase() === inviteEmail.toLowerCase());
+      const targetUser = usersList.find(u => u.email && inviteEmail && u.email.toLowerCase() === inviteEmail.toLowerCase());
       if (targetUser) {
         await addNotification(
           targetUser.uid,
@@ -621,7 +621,7 @@ export default function TripDetailScreen() {
                 ) : (
                   settlement.transactions.map((tx, idx) => {
                     const creditorUser = usersList.find(u => u.uid === tx.to);
-                    const upiId = creditorUser?.email ? `${creditorUser.email.split('@')[0]}@okaxis` : `${getUserNameById(tx.to).toLowerCase().replace(/\s+/g, '')}@okaxis`;
+                    const upiId = creditorUser?.email ? `${creditorUser.email.split('@')[0]}@okaxis` : `${(getUserNameById(tx.to) || 'user').toLowerCase().replace(/\s+/g, '')}@okaxis`;
                     
                     return (
                       <View key={idx} style={styles.completedDebtCard}>

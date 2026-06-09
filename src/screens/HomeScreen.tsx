@@ -56,6 +56,16 @@ export default function HomeScreen() {
     }
   }, [user]);
 
+  const handleRespondToInvitation = async (invitationId: string, accept: boolean) => {
+    if (!user) return;
+    try {
+      await respondToInvitation(invitationId, user.uid, accept);
+      Alert.alert('Success', `Invitation ${accept ? 'accepted' : 'declined'} successfully!`);
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to respond to invitation');
+    }
+  };
+
   const filteredTrips = trips.filter(t => t.status === activeTab);
 
   const getCreatorName = (createdByUid: string) => {
@@ -192,13 +202,13 @@ export default function HomeScreen() {
                 <View style={styles.invitationActionRow}>
                   <TouchableOpacity
                     style={[styles.invButton, styles.acceptButton]}
-                    onPress={() => respondToInvitation(inv.id, user!.uid, true)}
+                    onPress={() => handleRespondToInvitation(inv.id, true)}
                   >
                     <Text style={styles.acceptButtonText}>Accept</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.invButton, styles.declineButton]}
-                    onPress={() => respondToInvitation(inv.id, user!.uid, false)}
+                    onPress={() => handleRespondToInvitation(inv.id, false)}
                   >
                     <Text style={styles.declineButtonText}>Decline</Text>
                   </TouchableOpacity>

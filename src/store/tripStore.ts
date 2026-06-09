@@ -101,11 +101,12 @@ export const useTripStore = create<TripState>()(
 
       inviteMember: async (tripId, email, invitedBy) => {
         set({ loading: true, error: null });
-        const invitationId = `${tripId}_${email.replace(/\./g, '_')}`;
+        const safeEmail = (email || '').toLowerCase();
+        const invitationId = `${tripId}_${safeEmail.replace(/\./g, '_')}`;
         const newInvitation: TripMemberInvitation = {
           id: invitationId,
           tripId,
-          email: email.toLowerCase(),
+          email: safeEmail,
           userId: null,
           status: 'invited',
           invitedBy: invitedBy.name,
@@ -318,6 +319,7 @@ export const useTripStore = create<TripState>()(
       },
 
       syncInvitations: (email) => {
+        if (!email) return () => {};
         if (USE_FIREBASE && db) {
           const q = query(
             collection(db, 'tripMembers'), 

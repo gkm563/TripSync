@@ -116,7 +116,7 @@ export const useAuthStore = create<AuthState>()(
             }
           } else {
             // Mock authentication flow
-            const foundUser = get().usersList.find(u => u.email.toLowerCase() === email.toLowerCase());
+            const foundUser = get().usersList.find(u => u.email && email && u.email.toLowerCase() === email.toLowerCase());
             if (foundUser) {
               set({ user: foundUser, loading: false });
             } else {
