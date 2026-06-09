@@ -10,8 +10,7 @@ import {
   KeyboardAvoidingView, 
   Platform,
   ScrollView,
-  Alert,
-  Modal
+  Alert
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../store/authStore';
@@ -26,12 +25,7 @@ export default function AuthScreen() {
   const [email, setEmail] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const [googleModalVisible, setGoogleModalVisible] = useState(false);
-  const [googleEmailInput, setGoogleEmailInput] = useState('');
 
-  const handleGoogleLogin = () => {
-    setGoogleModalVisible(true);
-  };
 
   const handleSubmit = async () => {
     if (!email) {
@@ -173,76 +167,7 @@ export default function AuthScreen() {
             </View>
           )}
 
-          {USE_FIREBASE && (
-            <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-              <Image 
-                source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png' }} 
-                style={styles.googleIcon} 
-              />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
-          )}
-        </ScrollView>
-
-        {/* Google Login Fallback Modal */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={googleModalVisible}
-          onRequestClose={() => {
-            setGoogleModalVisible(false);
-            setGoogleEmailInput('');
-          }}
-        >
-          <View style={styles.modalBg}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Google Sign In</Text>
-              <Text style={styles.modalSub}>
-                Enter your Google Email address to simulate sign in:
-              </Text>
-              
-              <TextInput
-                style={styles.modalInput}
-                placeholder="e.g. gautam@gmail.com"
-                placeholderTextColor={COLORS.light.textMuted}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={googleEmailInput}
-                onChangeText={setGoogleEmailInput}
-              />
-
-              <View style={styles.modalActionRow}>
-                <TouchableOpacity 
-                  style={[styles.modalBtn, styles.modalCancelBtn]} 
-                  onPress={() => {
-                    setGoogleModalVisible(false);
-                    setGoogleEmailInput('');
-                  }}
-                >
-                  <Text style={styles.modalCancelText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.modalBtn, styles.modalSubmitBtn]} 
-                  onPress={async () => {
-                    if (!googleEmailInput || !googleEmailInput.includes('@')) {
-                      Alert.alert('Error', 'Please enter a valid Google email address.');
-                      return;
-                    }
-                    setGoogleModalVisible(false);
-                    try {
-                      await login(googleEmailInput);
-                      setGoogleEmailInput('');
-                    } catch (e: any) {
-                      Alert.alert('Sign In Failed', e.message || 'Failed to sign in with Google');
-                    }
-                  }}
-                >
-                  <Text style={styles.modalSubmitText}>Sign In</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
+         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
   );
