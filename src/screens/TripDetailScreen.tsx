@@ -621,7 +621,7 @@ export default function TripDetailScreen() {
                 ) : (
                   settlement.transactions.map((tx, idx) => {
                     const creditorUser = usersList.find(u => u.uid === tx.to);
-                    const upiId = creditorUser?.email ? `${creditorUser.email.split('@')[0]}@okaxis` : `${(getUserNameById(tx.to) || 'user').toLowerCase().replace(/\s+/g, '')}@okaxis`;
+                    const upiId = creditorUser?.upiId || (creditorUser?.email ? `${creditorUser.email.split('@')[0]}@okaxis` : `${(getUserNameById(tx.to) || 'user').toLowerCase().replace(/\s+/g, '')}@okaxis`);
                     
                     return (
                       <View key={idx} style={styles.completedDebtCard}>

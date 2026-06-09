@@ -5,6 +5,8 @@ export interface User {
   photoURL: string;
   joinedAt: Date | any; // Firebase Timestamp or Date
   fcmToken: string | null;
+  upiId?: string;
+  bio?: string;
 }
 
 export interface Trip {

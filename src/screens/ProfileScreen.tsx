@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   StyleSheet, 
   View, 
@@ -6,20 +6,41 @@ import {
   Image, 
   TouchableOpacity, 
   ScrollView,
-  Alert
+  Alert,
+  TextInput,
+  Modal,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/authStore';
 import { useTripStore } from '../store/tripStore';
 import { useExpenseStore } from '../store/expenseStore';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../constants/theme';
-import { LogOut, RefreshCw, User, ShieldAlert, Award, TrendingUp } from 'lucide-react-native';
+import { LogOut, RefreshCw, User, ShieldAlert, Award, TrendingUp, Edit3, CreditCard, Check } from 'lucide-react-native';
 import { USE_FIREBASE } from '../firebase/config';
 
+const PRESET_AVATARS = [
+  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+];
+
 export default function ProfileScreen() {
-  const { user, usersList, switchUser, logout } = useAuthStore();
+  const { user, usersList, switchUser, logout, updateProfile } = useAuthStore();
   const { trips } = useTripStore();
   const { expenses } = useExpenseStore();
+
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editPhotoURL, setEditPhotoURL] = useState('');
+  const [editUpiId, setEditUpiId] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [saving, setSaving] = useState(false);
 
   if (!user) return null;
 
@@ -40,6 +61,37 @@ export default function ProfileScreen() {
     Alert.alert('Profile Switched', `Logged in as ${name}`);
   };
 
+  const handleOpenEdit = () => {
+    setEditName(user.name);
+    setEditPhotoURL(user.photoURL);
+    setEditUpiId(user.upiId || '');
+    setEditBio(user.bio || '');
+    setEditModalVisible(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editName.trim()) {
+      Alert.alert('Validation Error', 'Name cannot be empty.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await updateProfile(
+        editName.trim(), 
+        editPhotoURL.trim(), 
+        editUpiId.trim() || undefined, 
+        editBio.trim() || undefined
+      );
+      setEditModalVisible(false);
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to update profile.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -47,8 +99,28 @@ export default function ProfileScreen() {
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <Image source={{ uri: user.photoURL }} style={styles.avatar} />
+          
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
+          
+          {user.bio ? (
+            <Text style={styles.bioText} numberOfLines={2}>"{user.bio}"</Text>
+          ) : (
+            <Text style={styles.noBioText}>No bio set yet</Text>
+          )}
+
+          <View style={styles.upiBadge}>
+            <CreditCard size={12} color={COLORS.light.textMuted} />
+            <Text style={styles.upiText} numberOfLines={1}>
+              {user.upiId || 'No UPI ID configured'}
+            </Text>
+          </View>
+
+          <TouchableOpacity style={styles.editBtn} onPress={handleOpenEdit}>
+            <Edit3 size={14} color={COLORS.light.primary} />
+            <Text style={styles.editBtnText}>Edit Profile</Text>
+          </TouchableOpacity>
+
           <View style={styles.badgeRow}>
             <View style={styles.badge}>
               <Award size={12} color={COLORS.light.primary} />
@@ -122,6 +194,131 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={editModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalCard}>
+            <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
+              <Text style={styles.modalTitle}>Edit Profile Settings</Text>
+
+              {/* Preview Selected Avatar */}
+              <View style={styles.avatarPreviewContainer}>
+                <Image source={{ uri: editPhotoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' }} style={styles.previewAvatar} />
+                <Text style={styles.previewLabel}>Profile Picture Preview</Text>
+              </View>
+
+              {/* Name Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Name</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter your name"
+                  value={editName}
+                  onChangeText={setEditName}
+                />
+              </View>
+
+              {/* Bio Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Short Bio</Text>
+                <TextInput
+                  style={[styles.textInput, styles.multilineInput]}
+                  placeholder="Tell others something about you..."
+                  value={editBio}
+                  onChangeText={setEditBio}
+                  multiline={true}
+                  numberOfLines={2}
+                  maxLength={80}
+                />
+              </View>
+
+              {/* UPI ID Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>UPI ID (for payments from friends)</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="e.g. gautam@okaxis"
+                  value={editUpiId}
+                  onChangeText={setEditUpiId}
+                  autoCapitalize="none"
+                />
+              </View>
+
+              {/* Preset Avatars Selector */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Choose from beautiful presets:</Text>
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.presetScroll}
+                >
+                  {PRESET_AVATARS.map((url, i) => {
+                    const isSelected = editPhotoURL === url;
+                    return (
+                      <TouchableOpacity 
+                        key={i} 
+                        style={[styles.presetItem, isSelected && styles.selectedPresetItem]}
+                        onPress={() => setEditPhotoURL(url)}
+                      >
+                        <Image source={{ uri: url }} style={styles.presetImg} />
+                        {isSelected && (
+                          <View style={styles.checkmarkBadge}>
+                            <Check size={8} color="#fff" strokeWidth={3} />
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              {/* Custom Image URL Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Or paste custom Profile Image URL</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="https://example.com/photo.jpg"
+                  value={editPhotoURL}
+                  onChangeText={setEditPhotoURL}
+                  autoCapitalize="none"
+                />
+              </View>
+
+              {/* Action Buttons */}
+              <View style={styles.modalActions}>
+                <TouchableOpacity 
+                  style={[styles.modalBtn, styles.cancelBtn]}
+                  onPress={() => setEditModalVisible(false)}
+                  disabled={saving}
+                >
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.modalBtn, styles.saveBtn]}
+                  onPress={handleSaveProfile}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.saveBtnText}>Save Profile</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -146,15 +343,15 @@ const styles = StyleSheet.create({
     ...SHADOWS.light.sm,
   },
   avatar: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     borderRadius: RADIUS.round,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
     borderWidth: 3,
     borderColor: COLORS.light.primary,
   },
   name: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.light.text,
   },
@@ -162,6 +359,54 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.light.textSecondary,
     marginTop: 2,
+  },
+  bioText: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: COLORS.light.textSecondary,
+    textAlign: 'center',
+    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+  },
+  noBioText: {
+    fontSize: 13,
+    fontStyle: 'italic',
+    color: COLORS.light.textMuted,
+    marginTop: SPACING.sm,
+  },
+  upiBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+    marginTop: SPACING.md,
+    maxWidth: '90%',
+  },
+  upiText: {
+    fontSize: 12,
+    color: COLORS.light.textSecondary,
+    fontWeight: '500',
+  },
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: COLORS.light.primary,
+    borderRadius: RADIUS.round,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 6,
+    marginTop: SPACING.lg,
+  },
+  editBtnText: {
+    fontSize: 12,
+    color: COLORS.light.primary,
+    fontWeight: 'bold',
   },
   badgeRow: {
     flexDirection: 'row',
@@ -297,5 +542,131 @@ const styles = StyleSheet.create({
     color: COLORS.light.error,
     fontWeight: 'bold',
     fontSize: 15,
+  },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: RADIUS.xxl,
+    borderTopRightRadius: RADIUS.xxl,
+    maxHeight: '85%',
+    padding: SPACING.xl,
+    ...SHADOWS.light.lg,
+  },
+  modalScroll: {
+    paddingBottom: SPACING.xl,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
+  },
+  avatarPreviewContainer: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  previewAvatar: {
+    width: 70,
+    height: 70,
+    borderRadius: RADIUS.round,
+    borderWidth: 2,
+    borderColor: COLORS.light.primary,
+    marginBottom: 6,
+  },
+  previewLabel: {
+    fontSize: 11,
+    color: COLORS.light.textMuted,
+  },
+  inputGroup: {
+    marginBottom: SPACING.md,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: COLORS.light.textSecondary,
+    marginBottom: 6,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    fontSize: 14,
+    color: COLORS.light.text,
+    backgroundColor: COLORS.light.background,
+  },
+  multilineInput: {
+    textAlignVertical: 'top',
+    height: 60,
+  },
+  presetScroll: {
+    gap: SPACING.sm,
+    paddingVertical: 4,
+  },
+  presetItem: {
+    position: 'relative',
+    borderRadius: RADIUS.round,
+    padding: 2,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedPresetItem: {
+    borderColor: COLORS.light.primary,
+  },
+  presetImg: {
+    width: 44,
+    height: 44,
+    borderRadius: RADIUS.round,
+  },
+  checkmarkBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: COLORS.light.primary,
+    borderRadius: RADIUS.round,
+    width: 14,
+    height: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#fff',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginTop: SPACING.lg,
+  },
+  modalBtn: {
+    flex: 1,
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelBtn: {
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  cancelBtnText: {
+    color: COLORS.light.textSecondary,
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  saveBtn: {
+    backgroundColor: COLORS.light.primary,
+  },
+  saveBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });

@@ -23,6 +23,7 @@ interface AuthState {
   switchUser: (uid: string) => void;
   registerUser: (name: string, email: string) => Promise<void>;
   updateFcmToken: (token: string) => Promise<void>;
+  updateProfile: (name: string, photoURL: string, upiId?: string, bio?: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -211,6 +212,40 @@ export const useAuthStore = create<AuthState>()(
           } catch (e) {
             console.warn("Failed to save FCM token to Firebase:", e);
           }
+        }
+      },
+
+      updateProfile: async (name: string, photoURL: string, upiId?: string, bio?: string) => {
+        const currentUser = get().user;
+        if (!currentUser) return;
+
+        set({ loading: true, error: null });
+        const updatedFields = {
+          name,
+          photoURL,
+          ...(upiId !== undefined && { upiId }),
+          ...(bio !== undefined && { bio }),
+        };
+
+        const updatedUser = { ...currentUser, ...updatedFields };
+        
+        try {
+          if (USE_FIREBASE && db) {
+            await setDoc(doc(db, 'users', currentUser.uid), updatedFields, { merge: true });
+          }
+          
+          const updatedUsersList = get().usersList.map((u) => 
+            u.uid === currentUser.uid ? { ...u, ...updatedFields } : u
+          );
+
+          set({ 
+            user: updatedUser, 
+            usersList: updatedUsersList, 
+            loading: false 
+          });
+        } catch (err: any) {
+          set({ error: err.message, loading: false });
+          throw err;
         }
       },
     }),
