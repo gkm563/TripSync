@@ -21,6 +21,12 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": []
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": "03b03fe5-eb6f-4314-838f-a343bcbdb999"
+      }
+    },
+    "owner": "gkm563"
   }
 }
