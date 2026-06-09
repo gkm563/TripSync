@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { initializeAuth, getReactNativePersistence, getAuth } from 'firebase/auth';
+import { initializeFirestore, getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Firebase credentials
@@ -28,19 +28,27 @@ if (USE_FIREBASE) {
   try {
     if (getApps().length === 0) {
       app = initializeApp(firebaseConfig);
-      auth = initializeAuth(app, {
-        persistence: getReactNativePersistence(AsyncStorage),
-      });
-      db = initializeFirestore(app, {});
     } else {
       app = getApp();
+    }
+
+    // Safely retrieve or initialize Auth
+    try {
+      auth = getAuth(app);
+    } catch (authErr) {
       auth = initializeAuth(app, {
         persistence: getReactNativePersistence(AsyncStorage),
       });
+    }
+
+    // Safely retrieve or initialize Firestore
+    try {
+      db = getFirestore(app);
+    } catch (dbErr) {
       db = initializeFirestore(app, {});
     }
   } catch (error) {
-    console.warn("Failed to initialize Firebase:", error);
+    console.warn("Failed to initialize Firebase App:", error);
   }
 }
 
