@@ -502,3 +502,7 @@ Daily activity and development milestones tracking.
 - **Activity**: perf: reduce map tile rendering overhead
 - **Checkpoint**: `309798`
 
+### Entry: 2026-06-22 15:16:22
+- **Activity**: feat(geo): refine route calculation helper
+- **Checkpoint**: `246870`
+
