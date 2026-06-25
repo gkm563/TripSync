@@ -60,7 +60,15 @@ export const useAuthStore = create<AuthState>()(
               const userRef = doc(db, 'users', firebaseUser.uid);
               const userSnap = await getDoc(userRef);
               if (userSnap.exists()) {
-                set({ user: userSnap.data() as User, loading: false });
+                const u = userSnap.data() as User;
+                set((state) => {
+                  const exists = state.usersList.some(user => user.uid === u.uid);
+                  return {
+                    user: u,
+                    usersList: exists ? state.usersList : [...state.usersList, u],
+                    loading: false
+                  };
+                });
               } else {
                 // Fallback / auto-create
                 const newUser: User = {
@@ -72,7 +80,14 @@ export const useAuthStore = create<AuthState>()(
                   fcmToken: null,
                 };
                 await setDoc(userRef, newUser);
-                set({ user: newUser, loading: false });
+                set((state) => {
+                  const exists = state.usersList.some(user => user.uid === newUser.uid);
+                  return {
+                    user: newUser,
+                    usersList: exists ? state.usersList : [...state.usersList, newUser],
+                    loading: false
+                  };
+                });
               }
             } else {
               set({ user: null, loading: false });
@@ -96,7 +111,15 @@ export const useAuthStore = create<AuthState>()(
             const userRef = doc(db, 'users', credentials.user.uid);
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
-              set({ user: userSnap.data() as User, loading: false });
+              const u = userSnap.data() as User;
+              set((state) => {
+                const exists = state.usersList.some(user => user.uid === u.uid);
+                return {
+                  user: u,
+                  usersList: exists ? state.usersList : [...state.usersList, u],
+                  loading: false
+                };
+              });
             } else {
               const newUser: User = {
                 uid: credentials.user.uid,
@@ -107,7 +130,14 @@ export const useAuthStore = create<AuthState>()(
                 fcmToken: null,
               };
               await setDoc(userRef, newUser);
-              set({ user: newUser, loading: false });
+              set((state) => {
+                const exists = state.usersList.some(user => user.uid === newUser.uid);
+                return {
+                  user: newUser,
+                  usersList: exists ? state.usersList : [...state.usersList, newUser],
+                  loading: false
+                };
+              });
             }
           } else {
             // Mock authentication flow
@@ -187,7 +217,14 @@ export const useAuthStore = create<AuthState>()(
               fcmToken: null,
             };
             await setDoc(doc(db, 'users', newUser.uid), newUser);
-            set({ user: newUser, loading: false });
+            set((state) => {
+              const exists = state.usersList.some(user => user.uid === newUser.uid);
+              return {
+                user: newUser,
+                usersList: exists ? state.usersList : [...state.usersList, newUser],
+                loading: false
+              };
+            });
           } else {
             const newUser: User = {
               uid: `mock_${Date.now()}`,

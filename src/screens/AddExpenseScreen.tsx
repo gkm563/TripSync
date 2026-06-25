@@ -52,7 +52,20 @@ export default function AddExpenseScreen() {
   const { addNotification } = useNotificationStore();
 
   const trip = trips.find(t => t.id === tripId);
-  const activeMembers = usersList.filter(u => trip?.members.includes(u.uid));
+  // Resolve active members robustly by mapping trip.members and falling back if not found in usersList
+  const activeMembers = trip
+    ? trip.members.map(uid => {
+        const found = usersList.find(u => u.uid === uid);
+        if (found) return found;
+        if (uid === user?.uid) return user;
+        return {
+          uid,
+          name: uid === user?.uid ? user.name : `Member (${uid.slice(0, 4)})`,
+          email: '',
+          photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+        };
+      })
+    : [];
 
   // Payer Mode: 'single' | 'multiple'
   const [payerMode, setPayerMode] = useState<'single' | 'multiple'>('single');

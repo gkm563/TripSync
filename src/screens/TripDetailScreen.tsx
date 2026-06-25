@@ -109,7 +109,18 @@ export default function TripDetailScreen() {
     );
   }
 
-  const activeMembers = usersList.filter(u => trip.members.includes(u.uid));
+  // Resolve active members robustly by mapping trip.members and falling back if not found in usersList
+  const activeMembers = trip.members.map(uid => {
+    const found = usersList.find(u => u.uid === uid);
+    if (found) return found;
+    if (uid === user?.uid) return user;
+    return {
+      uid,
+      name: uid === user?.uid ? user.name : `Member (${uid.slice(0, 4)})`,
+      email: '',
+      photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    };
+  });
   const tripExpenses = expenses.filter(e => e.tripId === tripId);
   const approvedExpenses = tripExpenses.filter(e => e.status === 'approved');
   const pendingExpenses = tripExpenses.filter(e => e.status === 'pending');

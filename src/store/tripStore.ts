@@ -69,7 +69,7 @@ export const useTripStore = create<TripState>()(
         set({ loading: true, error: null });
         const initialMembers = (USE_FIREBASE && db)
           ? [creator.uid]
-          : ['gautam_uid', 'rohit_uid', 'praveen_uid'];
+          : Array.from(new Set([creator.uid, 'gautam_uid', 'rohit_uid', 'praveen_uid']));
         const newTrip: Trip = {
           id: `trip_${Date.now()}`,
           name,
