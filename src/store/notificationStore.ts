@@ -85,7 +85,11 @@ export const useNotificationStore = create<NotificationState>()(
           try {
             let NotificationsInstance: any = null;
             try {
-              NotificationsInstance = require('expo-notifications');
+              const Constants = require('expo-constants').default;
+              const isExpoGo = Constants?.appOwnership === 'expo';
+              if (!isExpoGo) {
+                NotificationsInstance = require('expo-notifications');
+              }
             } catch (e) {
               // Ignore if not loaded
             }
