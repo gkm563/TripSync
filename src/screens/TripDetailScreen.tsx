@@ -40,7 +40,9 @@ import {
   FileText,
   Copy,
   Info,
-  CheckCircle2
+  CheckCircle2,
+  User,
+  CreditCard
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, G } from 'react-native-svg';
@@ -76,6 +78,7 @@ export default function TripDetailScreen() {
   const [inviteModalVisible, setInviteModalVisible] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<any | null>(null);
 
   // Personal Expense form
   const [personalTitle, setPersonalTitle] = useState('');
@@ -417,6 +420,23 @@ export default function TripDetailScreen() {
         {/* Tab 1: Dashboard */}
         {activeTab === 'dashboard' && (
           <View>
+            {/* Horizontal Active Members Tray */}
+            <View style={styles.membersTrayCard}>
+              <Text style={styles.membersTrayTitle}>Trip Members ({activeMembers.length})</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.membersTrayScroll}>
+                {activeMembers.map((member) => (
+                  <TouchableOpacity
+                    key={member.uid}
+                    style={styles.memberTrayItem}
+                    onPress={() => setSelectedProfile(member)}
+                  >
+                    <Image source={{ uri: member.photoURL }} style={styles.memberTrayAvatar} />
+                    <Text style={styles.memberTrayName} numberOfLines={1}>{member.name.split(' ')[0]}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
             {/* Total Expense Card */}
             <LinearGradient
               colors={COLORS.light.primaryGradient as any}
@@ -453,7 +473,11 @@ export default function TripDetailScreen() {
                 const percent = settlement.totalExpense > 0 ? (contrib / settlement.totalExpense) * 100 : 0;
                 
                 return (
-                  <View key={member.uid} style={styles.memberProgressRow}>
+                  <TouchableOpacity 
+                    key={member.uid} 
+                    style={styles.memberProgressRow}
+                    onPress={() => setSelectedProfile(member)}
+                  >
                     <Image source={{ uri: member.photoURL }} style={styles.memberAvatar} />
                     <View style={styles.memberProgressInfo}>
                       <View style={styles.memberNameAmtRow}>
@@ -464,7 +488,7 @@ export default function TripDetailScreen() {
                         <View style={[styles.progressBarFill, { width: `${percent}%` }]} />
                       </View>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 );
               })}
             </View>
@@ -704,7 +728,11 @@ export default function TripDetailScreen() {
                   const isSettled = Math.abs(bal) < 0.05;
 
                   return (
-                    <View key={member.uid} style={styles.completedMemberRow}>
+                    <TouchableOpacity 
+                      key={member.uid} 
+                      style={styles.completedMemberRow}
+                      onPress={() => setSelectedProfile(member)}
+                    >
                       <View style={styles.memberProfile}>
                         <Image source={{ uri: member.photoURL }} style={styles.memberAvatar} />
                         <View style={styles.memberInfoCol}>
@@ -727,7 +755,7 @@ export default function TripDetailScreen() {
                           </View>
                         )}
                       </View>
-                    </View>
+                    </TouchableOpacity>
                   );
                 })}
               </View>
@@ -1060,6 +1088,116 @@ export default function TripDetailScreen() {
                   <Text style={styles.modalSubmitText}>Invite</Text>
                 )}
               </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* User Profile Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={selectedProfile !== null}
+        onRequestClose={() => setSelectedProfile(null)}
+      >
+        <View style={styles.profileModalBg}>
+          <View style={styles.profileModalCard}>
+            <LinearGradient
+              colors={['#1e293b', '#0f172a']}
+              style={styles.profileModalHeader}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <TouchableOpacity
+                style={styles.profileModalCloseBtn}
+                onPress={() => setSelectedProfile(null)}
+              >
+                <Text style={styles.profileModalCloseText}>✕</Text>
+              </TouchableOpacity>
+              <Image
+                source={{ uri: selectedProfile?.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' }}
+                style={styles.profileModalAvatar}
+              />
+              <Text style={styles.profileModalName}>{selectedProfile?.name}</Text>
+              <Text style={styles.profileModalEmail}>{selectedProfile?.email || 'No email shared'}</Text>
+            </LinearGradient>
+
+            <View style={styles.profileModalBody}>
+              {/* Bio Section */}
+              <View style={styles.profileSection}>
+                <Text style={styles.profileSectionLabel}>About / Bio</Text>
+                <Text style={styles.profileBioText}>
+                  {selectedProfile?.bio || 'No bio added yet.'}
+                </Text>
+              </View>
+
+              {/* UPI ID Section */}
+              <View style={styles.profileSection}>
+                <Text style={styles.profileSectionLabel}>UPI ID</Text>
+                {selectedProfile?.upiId ? (
+                  <TouchableOpacity
+                    style={styles.profileUpiCapsule}
+                    onPress={() => {
+                      Clipboard.setString(selectedProfile.upiId);
+                      Alert.alert('Copied', `UPI ID "${selectedProfile.upiId}" has been copied to clipboard!`);
+                    }}
+                  >
+                    <CreditCard size={16} color={COLORS.light.primary} style={{ marginRight: 6 }} />
+                    <Text style={styles.profileUpiText}>{selectedProfile.upiId}</Text>
+                    <Copy size={14} color={COLORS.light.textSecondary} style={{ marginLeft: 'auto' }} />
+                  </TouchableOpacity>
+                ) : (
+                  <View style={[styles.profileUpiCapsule, styles.profileUpiCapsuleDisabled]}>
+                    <CreditCard size={16} color={COLORS.light.textMuted} style={{ marginRight: 6 }} />
+                    <Text style={styles.profileUpiTextDisabled}>No UPI ID linked</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Trip Statistics Section */}
+              <View style={styles.profileSection}>
+                <Text style={styles.profileSectionLabel}>Trip Stats</Text>
+                <View style={styles.profileStatsRow}>
+                  <View style={styles.profileStatBox}>
+                    <User size={20} color={COLORS.light.primary} />
+                    <Text style={styles.profileStatVal}>
+                      {selectedProfile ? trips.filter(t => t.members.includes(selectedProfile.uid)).length : 0}
+                    </Text>
+                    <Text style={styles.profileStatLbl}>Total Trips</Text>
+                  </View>
+                  <View style={styles.profileStatBox}>
+                    <DollarSign size={20} color="#10b981" />
+                    <Text style={styles.profileStatVal}>
+                      ₹{selectedProfile ? (settlement.contributions[selectedProfile.uid] || 0).toLocaleString() : 0}
+                    </Text>
+                    <Text style={styles.profileStatLbl}>Contributed</Text>
+                  </View>
+                </View>
+
+                {/* Outstanding Standing in current trip */}
+                {selectedProfile && (
+                  <View style={styles.profileStandingContainer}>
+                    <Text style={styles.profileStandingTitle}>Current Trip Standing</Text>
+                    {Math.abs(settlement.balances[selectedProfile.uid] || 0) < 0.05 ? (
+                      <View style={[styles.statusBadge, styles.statusBadgeSettled, { alignSelf: 'flex-start', marginTop: 4 }]}>
+                        <Text style={styles.statusBadgeTextSettled}>Fully Settled</Text>
+                      </View>
+                    ) : (settlement.balances[selectedProfile.uid] || 0) > 0 ? (
+                      <View style={[styles.statusBadgeGets, { alignSelf: 'flex-start', marginTop: 4 }]}>
+                        <Text style={styles.statusBadgeTextGets}>
+                          Gets back ₹{(settlement.balances[selectedProfile.uid] || 0).toLocaleString()}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={[styles.statusBadgeOwes, { alignSelf: 'flex-start', marginTop: 4 }]}>
+                        <Text style={styles.statusBadgeTextOwes}>
+                          Owes ₹{Math.abs(settlement.balances[selectedProfile.uid] || 0).toLocaleString()}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
             </View>
           </View>
         </View>
@@ -2071,5 +2209,180 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#fff',
     fontWeight: 'bold',
+  },
+  membersTrayCard: {
+    backgroundColor: '#fff',
+    borderRadius: RADIUS.xl,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    ...SHADOWS.light.sm,
+  },
+  membersTrayTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+    marginBottom: SPACING.sm,
+  },
+  membersTrayScroll: {
+    gap: SPACING.md,
+  },
+  memberTrayItem: {
+    alignItems: 'center',
+    width: 60,
+  },
+  memberTrayAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.round,
+    borderWidth: 2,
+    borderColor: COLORS.light.primary,
+  },
+  memberTrayName: {
+    fontSize: 11,
+    color: COLORS.light.textSecondary,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  profileModalBg: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  profileModalCard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#fff',
+    borderRadius: RADIUS.xl,
+    overflow: 'hidden',
+    ...SHADOWS.light.lg,
+  },
+  profileModalHeader: {
+    padding: SPACING.xl,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  profileModalCloseBtn: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    width: 28,
+    height: 28,
+    borderRadius: RADIUS.round,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileModalCloseText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  profileModalAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: RADIUS.round,
+    borderWidth: 3,
+    borderColor: '#fff',
+    marginBottom: SPACING.sm,
+  },
+  profileModalName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  profileModalEmail: {
+    fontSize: 12,
+    color: '#94a3b8',
+  },
+  profileModalBody: {
+    padding: SPACING.xl,
+  },
+  profileSection: {
+    marginBottom: SPACING.lg,
+  },
+  profileSectionLabel: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    color: COLORS.light.textMuted,
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  profileBioText: {
+    fontSize: 13,
+    color: COLORS.light.text,
+    lineHeight: 18,
+    backgroundColor: '#f8fafc',
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  profileUpiCapsule: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  profileUpiCapsuleDisabled: {
+    backgroundColor: '#f8fafc',
+    opacity: 0.8,
+  },
+  profileUpiText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.light.text,
+  },
+  profileUpiTextDisabled: {
+    fontSize: 13,
+    color: COLORS.light.textMuted,
+    fontStyle: 'italic',
+  },
+  profileStatsRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  profileStatBox: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  profileStatVal: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+    marginTop: 4,
+    marginBottom: 2,
+  },
+  profileStatLbl: {
+    fontSize: 10,
+    color: COLORS.light.textSecondary,
+  },
+  profileStandingContainer: {
+    backgroundColor: '#f8fafc',
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  profileStandingTitle: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.light.textSecondary,
+    marginBottom: 2,
   },
 });
