@@ -42,7 +42,12 @@ import {
   Info,
   CheckCircle2,
   User,
-  CreditCard
+  CreditCard,
+  Calendar,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  TrendingUp
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, G } from 'react-native-svg';
@@ -79,6 +84,7 @@ export default function TripDetailScreen() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any | null>(null);
+  const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({});
 
   // Personal Expense form
   const [personalTitle, setPersonalTitle] = useState('');
@@ -144,6 +150,74 @@ export default function TripDetailScreen() {
   }, {} as Record<string, number>);
 
   const hasChartData = settlement.totalExpense > 0;
+
+  // Daily spending timeline helpers
+  const getGroupedExpensesByDay = () => {
+    const groups: Record<string, {
+      dateStr: string;
+      formattedDate: string;
+      totalGroupAmount: number;
+      myPaidAmount: number;
+      expenses: typeof approvedExpenses;
+    }> = {};
+
+    // Sort approved expenses by date and time ascending
+    const sorted = [...approvedExpenses].sort((a, b) => {
+      const dateCompare = a.date.localeCompare(b.date);
+      if (dateCompare !== 0) return dateCompare;
+      return a.time.localeCompare(b.time);
+    });
+
+    sorted.forEach(exp => {
+      const dateKey = exp.date; // YYYY-MM-DD
+      if (!groups[dateKey]) {
+        let formattedDate = '';
+        try {
+          const expDate = new Date(dateKey);
+          const today = new Date();
+          const yesterday = new Date();
+          yesterday.setDate(today.getDate() - 1);
+
+          const expDateStr = expDate.toDateString();
+          const todayStr = today.toDateString();
+          const yesterdayStr = yesterday.toDateString();
+
+          if (expDateStr === todayStr) {
+            formattedDate = 'Today';
+          } else if (expDateStr === yesterdayStr) {
+            formattedDate = 'Yesterday';
+          } else {
+            formattedDate = expDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+          }
+        } catch {
+          formattedDate = dateKey;
+        }
+
+        groups[dateKey] = {
+          dateStr: dateKey,
+          formattedDate,
+          totalGroupAmount: 0,
+          myPaidAmount: 0,
+          expenses: []
+        };
+      }
+
+      groups[dateKey].totalGroupAmount += exp.amount;
+      const myPaid = exp.paidBy[user?.uid || ''] || 0;
+      groups[dateKey].myPaidAmount += myPaid;
+      groups[dateKey].expenses.push(exp);
+    });
+
+    // Convert to array and sort descending (newest day first)
+    return Object.values(groups).sort((a, b) => b.dateStr.localeCompare(a.dateStr));
+  };
+
+  const toggleDayExpand = (dateStr: string) => {
+    setExpandedDays(prev => ({
+      ...prev,
+      [dateStr]: !prev[dateStr]
+    }));
+  };
 
   // Invite member submission
   const handleInvite = async () => {
@@ -461,6 +535,143 @@ export default function TripDetailScreen() {
                 <View style={styles.noDataBreakdown}>
                   <Info size={24} color={COLORS.light.textMuted} />
                   <Text style={styles.noDataText}>No approved expenses to display category chart.</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Daily Spending Timeline Card */}
+            <View style={styles.whiteCard}>
+              <View style={styles.timelineHeaderRow}>
+                <View>
+                  <Text style={styles.cardTitle}>📅 Daily Spending Timeline</Text>
+                  <Text style={styles.timelineSubtitle}>Track hourly progress & manage your budget</Text>
+                </View>
+                <View style={styles.timelineHeaderBadge}>
+                  <TrendingUp size={12} color={COLORS.light.primary} />
+                  <Text style={styles.timelineHeaderBadgeText}>Live</Text>
+                </View>
+              </View>
+
+              {getGroupedExpensesByDay().length === 0 ? (
+                <View style={styles.noDataBreakdown}>
+                  <Info size={20} color={COLORS.light.textMuted} />
+                  <Text style={styles.noDataText}>No approved expenses logged for this trip yet.</Text>
+                </View>
+              ) : (
+                getGroupedExpensesByDay().map((dayGroup, index) => {
+                  const isExpanded = expandedDays[dayGroup.dateStr] ?? (index === 0);
+                  const totalSpent = dayGroup.totalGroupAmount;
+                  const myPaid = dayGroup.myPaidAmount;
+                  
+                  return (
+                    <View key={dayGroup.dateStr} style={styles.dayGroupContainer}>
+                      {/* Day Header Trigger */}
+                      <TouchableOpacity 
+                        style={styles.dayGroupHeader}
+                        onPress={() => toggleDayExpand(dayGroup.dateStr)}
+                      >
+                        <View style={styles.dayHeaderLeft}>
+                          <View style={styles.calendarIconContainer}>
+                            <Calendar size={16} color={COLORS.light.primary} />
+                          </View>
+                          <View>
+                            <Text style={styles.dayTitleText}>
+                              {dayGroup.formattedDate}
+                            </Text>
+                            <Text style={styles.daySubText}>
+                              {dayGroup.expenses.length} expense{dayGroup.expenses.length > 1 ? 's' : ''}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.dayHeaderRight}>
+                          <View style={styles.dayAmtContainer}>
+                            <Text style={styles.dayGroupTotal}>₹{totalSpent.toLocaleString()}</Text>
+                            <Text style={styles.dayUserPaid}>I Paid: ₹{myPaid.toLocaleString()}</Text>
+                          </View>
+                          {isExpanded ? (
+                            <ChevronUp size={18} color={COLORS.light.textSecondary} />
+                          ) : (
+                            <ChevronDown size={18} color={COLORS.light.textSecondary} />
+                          )}
+                        </View>
+                      </TouchableOpacity>
+
+                      {/* Day Timeline Expenses List */}
+                      {isExpanded && (
+                        <View style={styles.timelineBody}>
+                          {dayGroup.expenses.map((exp, expIdx) => {
+                            const expPaid = exp.paidBy[user?.uid || ''] || 0;
+                            const creator = activeMembers.find(m => m.uid === exp.createdBy);
+                            const creatorName = creator ? (creator.uid === user?.uid ? 'You' : creator.name.split(' ')[0]) : 'Unknown';
+                            
+                            return (
+                              <View key={exp.id} style={styles.timelineItem}>
+                                {/* Left Time Column */}
+                                <View style={styles.timelineTimeCol}>
+                                  <Clock size={12} color={COLORS.light.textSecondary} style={{ marginRight: 4 }} />
+                                  <Text style={styles.timelineTimeText}>{exp.time}</Text>
+                                </View>
+
+                                {/* Middle Line Node */}
+                                <View style={styles.timelineLineContainer}>
+                                  <View style={[
+                                    styles.timelineNode,
+                                    expPaid > 0 ? styles.timelineNodeActive : null
+                                  ]} />
+                                  {expIdx < dayGroup.expenses.length - 1 && (
+                                    <View style={styles.timelineLine} />
+                                  )}
+                                </View>
+
+                                {/* Right Content Column */}
+                                <View style={styles.timelineContentCard}>
+                                  <View style={styles.timelineContentHeader}>
+                                    <Text style={styles.timelineItemTitle} numberOfLines={1}>{exp.title}</Text>
+                                    <Text style={styles.timelineItemAmt}>₹{exp.amount.toLocaleString()}</Text>
+                                  </View>
+                                  <View style={styles.timelineContentFooter}>
+                                    <Text style={styles.timelineItemMeta}>
+                                      {exp.category} • Paid by {creatorName}
+                                    </Text>
+                                    {expPaid > 0 && (
+                                      <Text style={styles.timelineMyPaid}>
+                                        You paid ₹{expPaid.toLocaleString()}
+                                      </Text>
+                                    )}
+                                  </View>
+                                </View>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      )}
+                    </View>
+                  );
+                })
+              )}
+
+              {/* Daily Budget Decision Insight Box */}
+              {getGroupedExpensesByDay().length > 0 && (
+                <View style={styles.decisionInsightBox}>
+                  <Info size={16} color={COLORS.light.primary} style={{ marginRight: 8, marginTop: 2 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.decisionInsightTitle}>Daily Budget Insight</Text>
+                    {(() => {
+                      const todayGroup = getGroupedExpensesByDay().find(g => g.formattedDate === 'Today');
+                      if (!todayGroup) {
+                        return <Text style={styles.decisionInsightText}>No expenses logged today. Your budget is completely clear for any upcoming travel plans!</Text>;
+                      }
+                      const todaySpent = todayGroup.totalGroupAmount;
+                      if (todaySpent > 5000) {
+                        return <Text style={styles.decisionInsightText}>⚠️ High Spend Alert: Today's group spend is ₹{todaySpent.toLocaleString()}. Consider review before scheduling further major spends tonight.</Text>;
+                      } else if (todaySpent > 2000) {
+                        return <Text style={styles.decisionInsightText}>💡 Moderate Spend Alert: Group spend is ₹{todaySpent.toLocaleString()} today. You are pacing normally for a typical day out.</Text>;
+                      } else {
+                        return <Text style={styles.decisionInsightText}>✅ Light Spend Alert: Group spend is just ₹{todaySpent.toLocaleString()} today. Excellent cost control, feel free to proceed with planned activities!</Text>;
+                      }
+                    })()}
+                  </View>
                 </View>
               )}
             </View>
@@ -2384,5 +2595,196 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.light.textSecondary,
     marginBottom: 2,
+  },
+  timelineHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  timelineSubtitle: {
+    fontSize: 11,
+    color: COLORS.light.textSecondary,
+    marginTop: 2,
+  },
+  timelineHeaderBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(99, 102, 241, 0.08)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.xs,
+    gap: 4,
+  },
+  timelineHeaderBadgeText: {
+    fontSize: 10,
+    color: COLORS.light.primary,
+    fontWeight: 'bold',
+  },
+  dayGroupContainer: {
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.lg,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+  dayGroupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.md,
+    backgroundColor: '#f8fafc',
+  },
+  dayHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  calendarIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayTitleText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+  },
+  daySubText: {
+    fontSize: 10,
+    color: COLORS.light.textSecondary,
+    marginTop: 2,
+  },
+  dayHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  dayAmtContainer: {
+    alignItems: 'flex-end',
+  },
+  dayGroupTotal: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+  },
+  dayUserPaid: {
+    fontSize: 10,
+    color: COLORS.light.success,
+    marginTop: 2,
+  },
+  timelineBody: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.light.border,
+    backgroundColor: '#fff',
+    paddingBottom: SPACING.sm,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: SPACING.md,
+    minHeight: 50,
+  },
+  timelineTimeCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 60,
+    justifyContent: 'flex-end',
+    paddingRight: SPACING.xs,
+  },
+  timelineTimeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.light.textSecondary,
+  },
+  timelineLineContainer: {
+    alignItems: 'center',
+    width: 24,
+  },
+  timelineNode: {
+    width: 10,
+    height: 10,
+    borderRadius: RADIUS.round,
+    backgroundColor: '#e2e8f0',
+    borderWidth: 2,
+    borderColor: '#cbd5e1',
+    marginTop: 6,
+  },
+  timelineNodeActive: {
+    backgroundColor: COLORS.light.primary,
+    borderColor: 'rgba(99, 102, 241, 0.3)',
+  },
+  timelineLine: {
+    width: 2,
+    flex: 1,
+    backgroundColor: '#e2e8f0',
+    marginTop: 4,
+    marginBottom: -16,
+  },
+  timelineContentCard: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    marginLeft: 4,
+  },
+  timelineContentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  timelineItemTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.light.text,
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
+  timelineItemAmt: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+  },
+  timelineContentFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  timelineItemMeta: {
+    fontSize: 10,
+    color: COLORS.light.textSecondary,
+  },
+  timelineMyPaid: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: COLORS.light.success,
+  },
+  decisionInsightBox: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(99, 102, 241, 0.05)',
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(99, 102, 241, 0.1)',
+    marginTop: SPACING.sm,
+  },
+  decisionInsightTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+  },
+  decisionInsightText: {
+    fontSize: 11,
+    color: COLORS.light.textSecondary,
+    marginTop: 2,
+    lineHeight: 15,
   },
 });
