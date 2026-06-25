@@ -90,7 +90,8 @@ interface ExpenseState {
     userId: string,
     userName: string,
     action: string,
-    type: ActivityLog['type']
+    type: ActivityLog['type'],
+    expenseId?: string
   ) => Promise<void>;
 
   checkForDuplicates: (
@@ -197,7 +198,8 @@ export const useExpenseStore = create<ExpenseState>()(
             createdBy,
             creatorName,
             `${creatorName} added expense: ${title} (₹${amount})`,
-            'expense_added'
+            'expense_added',
+            newExpense.id
           );
 
           set({ loading: false });
@@ -300,7 +302,8 @@ export const useExpenseStore = create<ExpenseState>()(
             updatedBy,
             updaterName,
             `${updaterName} edited expense: ${title} to version ${updatedExpense.version}`,
-            'expense_edited'
+            'expense_edited',
+            expenseId
           );
 
           set({ loading: false });
@@ -372,7 +375,8 @@ export const useExpenseStore = create<ExpenseState>()(
             userId,
             userName,
             `${userName} ${voteType} expense: "${currentExpense.title}"${vote === -1 ? ` (${rejectReason})` : ''}`,
-            vote === 1 ? 'expense_approved' : 'expense_rejected'
+            vote === 1 ? 'expense_approved' : 'expense_rejected',
+            expenseId
           );
         } catch (err: any) {
           set({ error: err.message });
@@ -404,7 +408,8 @@ export const useExpenseStore = create<ExpenseState>()(
               'system',
               'System',
               `Rejected expense "${currentExpense.title}" (₹${currentExpense.amount}) was deleted by the group`,
-              'expense_rejected'
+              'expense_rejected',
+              expenseId
             );
           }
         } catch (err: any) {
@@ -448,7 +453,8 @@ export const useExpenseStore = create<ExpenseState>()(
             userId,
             userName,
             `${userName} approved rejected expense: "${currentExpense.title}"`,
-            'expense_approved'
+            'expense_approved',
+            expenseId
           );
         } catch (err: any) {
           set({ error: err.message });
@@ -499,7 +505,7 @@ export const useExpenseStore = create<ExpenseState>()(
         }
       },
 
-      logActivity: async (tripId, userId, userName, action, type) => {
+      logActivity: async (tripId, userId, userName, action, type, expenseId) => {
         const newLog: ActivityLog = {
           id: `log_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
           tripId,
@@ -508,6 +514,7 @@ export const useExpenseStore = create<ExpenseState>()(
           action,
           type,
           createdAt: new Date().toISOString(),
+          ...(expenseId && { expenseId }),
         };
 
         try {

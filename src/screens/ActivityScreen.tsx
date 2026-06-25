@@ -75,6 +75,18 @@ export default function ActivityScreen() {
     return usersList.find(u => u.uid === uid)?.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
   };
 
+  const handleItemPress = (log: ActivityLog) => {
+    if (log.expenseId) {
+      if (log.action.includes('deleted by the group')) {
+        navigation.navigate('TripDetail', { tripId: log.tripId });
+      } else {
+        navigation.navigate('ExpenseDetails', { tripId: log.tripId, expenseId: log.expenseId });
+      }
+    } else {
+      navigation.navigate('TripDetail', { tripId: log.tripId });
+    }
+  };
+
   // Parsing utilities for cleaner UI representation
   const parseAmount = (actionText: string) => {
     const match = actionText.match(/₹\d+/);
@@ -301,7 +313,7 @@ export default function ActivityScreen() {
                         <TouchableOpacity
                           style={styles.bubbleCard}
                           activeOpacity={0.7}
-                          onPress={() => navigation.navigate('TripDetail', { tripId: log.tripId })}
+                          onPress={() => handleItemPress(log)}
                         >
                           {/* Card Header */}
                           <View style={styles.cardHeader}>

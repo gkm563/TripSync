@@ -625,7 +625,11 @@ export default function TripDetailScreen() {
                                 </View>
 
                                 {/* Right Content Column */}
-                                <View style={styles.timelineContentCard}>
+                                <TouchableOpacity 
+                                  style={styles.timelineContentCard}
+                                  activeOpacity={0.7}
+                                  onPress={() => navigation.navigate('ExpenseDetails', { tripId, expenseId: exp.id })}
+                                >
                                   <View style={styles.timelineContentHeader}>
                                     <Text style={styles.timelineItemTitle} numberOfLines={1}>{exp.title}</Text>
                                     <Text style={styles.timelineItemAmt}>₹{exp.amount.toLocaleString()}</Text>
@@ -640,7 +644,7 @@ export default function TripDetailScreen() {
                                       </Text>
                                     )}
                                   </View>
-                                </View>
+                                </TouchableOpacity>
                               </View>
                             );
                           })}
@@ -1156,12 +1160,20 @@ export default function TripDetailScreen() {
                       <View style={styles.pointDot} />
                       <View style={styles.pointLine} />
                     </View>
-                    <View style={styles.timelineContentCard}>
+                    <TouchableOpacity 
+                      style={styles.timelineContentCard}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        if (log.expenseId && !log.action.includes('deleted by the group')) {
+                          navigation.navigate('ExpenseDetails', { tripId, expenseId: log.expenseId });
+                        }
+                      }}
+                    >
                       <Text style={styles.logText}>{log.action}</Text>
                       <Text style={styles.logTime}>
                         {new Date(log.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                       </Text>
-                    </View>
+                    </TouchableOpacity>
                   </View>
                 ))
               )}

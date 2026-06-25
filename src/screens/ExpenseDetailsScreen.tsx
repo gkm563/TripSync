@@ -7,7 +7,8 @@ import {
   ScrollView, 
   Alert,
   Image,
-  ActivityIndicator
+  ActivityIndicator,
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -18,7 +19,7 @@ import { useExpenseStore } from '../store/expenseStore';
 import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../constants/theme';
-import { ChevronLeft, Edit2, Calendar, Clock, Tag, MessageSquare, ShieldCheck, ShieldAlert, History } from 'lucide-react-native';
+import { ChevronLeft, Edit2, Calendar, Clock, Tag, MessageSquare, ShieldCheck, ShieldAlert, History, X } from 'lucide-react-native';
 import { USE_FIREBASE, db } from '../firebase/config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { ExpenseVersion } from '../types';
@@ -41,6 +42,7 @@ export default function ExpenseDetailsScreen() {
   
   const [historyVersions, setHistoryVersions] = useState<ExpenseVersion[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [selectedVersionDetails, setSelectedVersionDetails] = useState<ExpenseVersion | null>(null);
 
   // Fetch historical versions
   useEffect(() => {
@@ -427,7 +429,12 @@ export default function ExpenseDetailsScreen() {
               </View>
 
               {historyVersions.map((ver) => (
-                <View key={ver.id} style={styles.historyItem}>
+                <TouchableOpacity 
+                  key={ver.id} 
+                  style={styles.historyItem}
+                  onPress={() => setSelectedVersionDetails(ver)}
+                  activeOpacity={0.7}
+                >
                   <View style={styles.historyLineContainer}>
                     <View style={styles.historyDot} />
                     <View style={styles.historyLine} />
@@ -440,13 +447,116 @@ export default function ExpenseDetailsScreen() {
                     <Text style={styles.historyChangeDesc}>
                       Title: "{ver.title}" • Amount: ₹{ver.amount} • Category: {ver.category}
                     </Text>
+                    <Text style={styles.tapToViewVer}>Tap to view full details →</Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           )}
         </View>
       </ScrollView>
+
+      {/* Modal for viewing archived version details */}
+      <Modal
+        visible={selectedVersionDetails !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSelectedVersionDetails(null)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setSelectedVersionDetails(null)}
+        >
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+            {selectedVersionDetails && (
+              <View style={styles.modalInner}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Archived Version {selectedVersionDetails.version} Details</Text>
+                  <TouchableOpacity 
+                    style={styles.closeModalBtn}
+                    onPress={() => setSelectedVersionDetails(null)}
+                  >
+                    <X size={20} color={COLORS.light.text} />
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+                  {/* Title & Amount */}
+                  <View style={styles.modalFieldGroup}>
+                    <Text style={styles.modalExpenseTitle}>"{selectedVersionDetails.title}"</Text>
+                    <Text style={styles.modalExpenseAmount}>₹{selectedVersionDetails.amount.toLocaleString()}</Text>
+                  </View>
+
+                  <View style={styles.metaDivider} />
+
+                  {/* Metadata */}
+                  <View style={styles.modalMetadataGrid}>
+                    <View style={styles.metaGridCell}>
+                      <Tag size={14} color={COLORS.light.textSecondary} />
+                      <Text style={styles.metaCellText}>{selectedVersionDetails.category}</Text>
+                    </View>
+                    <View style={styles.metaGridCell}>
+                      <Calendar size={14} color={COLORS.light.textSecondary} />
+                      <Text style={styles.metaCellText}>{selectedVersionDetails.date}</Text>
+                    </View>
+                    <View style={styles.metaGridCell}>
+                      <Clock size={14} color={COLORS.light.textSecondary} />
+                      <Text style={styles.metaCellText}>{selectedVersionDetails.time}</Text>
+                    </View>
+                  </View>
+
+                  {/* Creator / Editor details */}
+                  <View style={styles.versionEditorSection}>
+                    <Image source={{ uri: getUserAvatar(selectedVersionDetails.updatedBy) }} style={styles.editorAvatar} />
+                    <View style={styles.editorTextContainer}>
+                      <Text style={styles.editorName}>Edited by {getUserName(selectedVersionDetails.updatedBy)}</Text>
+                      <Text style={styles.editTime}>{new Date(selectedVersionDetails.updatedAt).toLocaleString()}</Text>
+                    </View>
+                  </View>
+
+                  {/* Notes (if any) */}
+                  {selectedVersionDetails.notes ? (
+                    <View style={styles.notesContainer}>
+                      <MessageSquare size={14} color={COLORS.light.textSecondary} style={styles.notesIcon} />
+                      <Text style={styles.notesText}>{selectedVersionDetails.notes}</Text>
+                    </View>
+                  ) : null}
+
+                  {/* Payer Breakdown */}
+                  <View style={styles.modalSectionCard}>
+                    <Text style={styles.modalSectionTitle}>Payers Breakdown</Text>
+                    {Object.entries(selectedVersionDetails.paidBy || {}).map(([uid, val]) => (
+                      <View key={uid} style={styles.payerBreakdownRow}>
+                        <View style={styles.payerProfile}>
+                          <Image source={{ uri: getUserAvatar(uid) }} style={styles.miniAvatar} />
+                          <Text style={styles.payerName}>{getUserName(uid)}</Text>
+                        </View>
+                        <Text style={styles.payerAmount}>₹{val.toLocaleString()}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* Participants */}
+                  {selectedVersionDetails.participants && selectedVersionDetails.participants.length > 0 ? (
+                    <View style={styles.modalSectionCard}>
+                      <Text style={styles.modalSectionTitle}>Participants</Text>
+                      <View style={styles.participantsList}>
+                        {selectedVersionDetails.participants.map((uid) => (
+                          <View key={uid} style={styles.participantTag}>
+                            <Image source={{ uri: getUserAvatar(uid) }} style={styles.participantAvatar} />
+                            <Text style={styles.participantName}>{getUserName(uid)}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  ) : null}
+                </ScrollView>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -889,5 +999,147 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: RADIUS.xl,
+    width: '100%',
+    maxHeight: '80%',
+    ...SHADOWS.light.lg,
+    overflow: 'hidden',
+  },
+  modalInner: {
+    padding: SPACING.lg,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: COLORS.light.border,
+    paddingBottom: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  modalTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+  },
+  closeModalBtn: {
+    padding: SPACING.xs,
+  },
+  modalScroll: {
+    maxHeight: '90%',
+  },
+  modalFieldGroup: {
+    alignItems: 'center',
+    marginVertical: SPACING.sm,
+  },
+  modalExpenseTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+    textAlign: 'center',
+  },
+  modalExpenseAmount: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: COLORS.light.text,
+    marginTop: SPACING.xs,
+  },
+  modalMetadataGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: SPACING.sm,
+    backgroundColor: COLORS.light.background,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  modalExpenseInfoText: {
+    fontSize: 12,
+    color: COLORS.light.textSecondary,
+  },
+  versionEditorSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.light.background,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginTop: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    gap: SPACING.sm,
+  },
+  editorAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: RADIUS.round,
+  },
+  editorTextContainer: {
+    flex: 1,
+  },
+  editorName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.light.text,
+  },
+  editTime: {
+    fontSize: 10,
+    color: COLORS.light.textSecondary,
+    marginTop: 1,
+  },
+  modalSectionCard: {
+    marginTop: SPACING.lg,
+    borderTopWidth: 1,
+    borderColor: COLORS.light.border,
+    paddingTop: SPACING.md,
+  },
+  modalSectionTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: COLORS.light.text,
+    marginBottom: SPACING.sm,
+  },
+  participantsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginTop: SPACING.xs,
+  },
+  participantTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 6,
+  },
+  participantAvatar: {
+    width: 18,
+    height: 18,
+    borderRadius: RADIUS.round,
+  },
+  participantName: {
+    fontSize: 11,
+    color: COLORS.light.textSecondary,
+    fontWeight: '500',
+  },
+  tapToViewVer: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.light.primary,
+    marginTop: SPACING.xs,
   },
 });

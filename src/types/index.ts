@@ -143,6 +143,7 @@ export interface ActivityLog {
     | 'expense_edited'
     | 'trip_end_requested'
     | 'trip_completed';
+  expenseId?: string;
   metadata?: Record<string, any>;
   createdAt: Date | any;
 }
