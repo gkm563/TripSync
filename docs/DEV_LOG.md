@@ -534,3 +534,7 @@ Daily activity and development milestones tracking.
 - **Activity**: chore: dependency updates and linting
 - **Checkpoint**: `960505`
 
+### Entry: 2026-06-25 12:02:22
+- **Activity**: fix: handle offline state fallbacks gracefully
+- **Checkpoint**: `506617`
+
