@@ -3,13 +3,13 @@ import {
   StyleSheet, 
   View, 
   Text, 
-  SafeAreaView, 
   TouchableOpacity, 
   ScrollView, 
   Alert,
   Image,
   ActivityIndicator
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
@@ -33,7 +33,7 @@ export default function ExpenseDetailsScreen() {
 
   const { user, usersList } = useAuthStore();
   const { trips } = useTripStore();
-  const { expenses, voteExpense } = useExpenseStore();
+  const { expenses, voteExpense, deleteExpense, forceApproveExpense } = useExpenseStore();
   const { addNotification } = useNotificationStore();
 
   const trip = trips.find(t => t.id === tripId);
@@ -88,6 +88,7 @@ export default function ExpenseDetailsScreen() {
   const score = Object.values(expense.votes || {}).reduce((a, b) => a + b, 0);
   const majorityNeeded = Math.floor(trip.members.length / 2) + 1;
   const isApproved = expense.status === 'approved';
+  const isRejected = expense.status === 'rejected';
 
   const getUserName = (uid: string) => {
     return usersList.find(u => u.uid === uid)?.name || 'Unknown';
@@ -155,6 +156,50 @@ export default function ExpenseDetailsScreen() {
     }
   };
 
+  const handleForceApproveAction = async () => {
+    if (!user) return;
+    try {
+      await forceApproveExpense(expenseId, user.uid, user.name);
+      
+      if (expense.createdBy !== user.uid) {
+        await addNotification(
+          expense.createdBy,
+          'Expense Approved Anyway',
+          `${user.name} approved the rejected expense "${expense.title}" (₹${expense.amount})`,
+          'expense_approved',
+          tripId,
+          expenseId
+        );
+      }
+      Alert.alert('Approved', 'Expense approved by group decision.');
+    } catch (e: any) {
+      Alert.alert('Error', e.message || 'Failed to approve expense');
+    }
+  };
+
+  const handleDeleteAction = async () => {
+    Alert.alert(
+      'Delete Rejected Expense',
+      'Are you sure you want to permanently delete this rejected expense from the trip history?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteExpense(expenseId);
+              navigation.goBack();
+              Alert.alert('Deleted', 'Rejected expense deleted.');
+            } catch (e: any) {
+              Alert.alert('Error', e.message || 'Failed to delete expense');
+            }
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -176,6 +221,15 @@ export default function ExpenseDetailsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {isRejected && (
+          <View style={styles.disputeBanner}>
+            <ShieldAlert size={20} color="#fff" />
+            <Text style={styles.disputeBannerText}>
+              This expense has been majority rejected and is pending a final group decision.
+            </Text>
+          </View>
+        )}
+
         {/* Main Details Card */}
         <View style={styles.detailsCard}>
           <View style={styles.categoryHeaderRow}>
@@ -214,7 +268,10 @@ export default function ExpenseDetailsScreen() {
         <View style={styles.whiteCard}>
           <View style={styles.statusTitleRow}>
             <Text style={styles.cardTitle}>Approval Status</Text>
-            <View style={[styles.statusIndicator, isApproved ? styles.statusApproved : styles.statusPending]}>
+            <View style={[
+              styles.statusIndicator, 
+              isApproved ? styles.statusApproved : isRejected ? styles.statusRejected : styles.statusPending
+            ]}>
               <Text style={styles.statusIndicatorText}>
                 {expense.status.toUpperCase()}
               </Text>
@@ -270,7 +327,25 @@ export default function ExpenseDetailsScreen() {
 
           {/* Voting Action buttons */}
           {trip.status !== 'completed' && user && (
-            expense.createdBy === user.uid ? (
+            expense.status === 'rejected' ? (
+              <View style={styles.disputeResolveBox}>
+                <Text style={styles.disputeResolveTitle}>Pending Group Decision:</Text>
+                <View style={styles.votingActionsRow}>
+                  <TouchableOpacity
+                    style={[styles.voteBtn, styles.approveBtn, { flex: 1.3 }]}
+                    onPress={handleForceApproveAction}
+                  >
+                    <Text style={[styles.voteBtnText, styles.approveBtnText]}>Approve anyway</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.voteBtn, styles.rejectBtn, { flex: 1 }]}
+                    onPress={handleDeleteAction}
+                  >
+                    <Text style={[styles.voteBtnText, styles.rejectBtnText]}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : expense.createdBy === user.uid ? (
               <View style={styles.autoVoteBadge}>
                 <Text style={styles.autoVoteBadgeText}>✓ Your vote counted automatically</Text>
               </View>
@@ -494,6 +569,36 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 18,
   },
+  disputeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.light.error,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
+    ...SHADOWS.light.sm,
+  },
+  disputeBannerText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
+    flex: 1,
+  },
+  disputeResolveBox: {
+    backgroundColor: 'rgba(239, 68, 68, 0.02)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.12)',
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  disputeResolveTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: COLORS.light.error,
+    marginBottom: SPACING.sm,
+  },
   whiteCard: {
     backgroundColor: '#fff',
     borderRadius: RADIUS.xl,
@@ -524,6 +629,9 @@ const styles = StyleSheet.create({
   },
   statusPending: {
     backgroundColor: COLORS.light.warning,
+  },
+  statusRejected: {
+    backgroundColor: COLORS.light.error,
   },
   statusIndicatorText: {
     color: '#fff',

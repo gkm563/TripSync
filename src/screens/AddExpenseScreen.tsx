@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, 
   View, 
@@ -6,13 +6,13 @@ import {
   TextInput, 
   TouchableOpacity, 
   ScrollView, 
-  SafeAreaView, 
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Alert,
   Modal
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
@@ -59,11 +59,33 @@ export default function AddExpenseScreen() {
   const [singlePayerId, setSinglePayerId] = useState(user?.uid || '');
   const [multiplePayers, setMultiplePayers] = useState<Record<string, string>>({});
 
+  // Custom Split Participants
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+  const [participantSearch, setParticipantSearch] = useState('');
+
+  // Date and Time Presets
+  const [datePreset, setDatePreset] = useState<'today' | 'yesterday' | 'custom'>('today');
+  const [timePreset, setTimePreset] = useState<'now' | '15m' | '30m' | '1h' | 'custom'>('now');
+
+  useEffect(() => {
+    if (trip) {
+      setSelectedParticipants(trip.members);
+    }
+  }, [tripId, trip?.members]);
+
+  const toggleParticipant = (uid: string) => {
+    setSelectedParticipants((prev) =>
+      prev.includes(uid)
+        ? prev.filter((id) => id !== uid)
+        : [...prev, uid]
+    );
+  };
+
   // Duplicate Warning Modal
   const [duplicateModalVisible, setDuplicateModalVisible] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<ExpenseFormData | null>(null);
 
-  const { control, handleSubmit, watch, formState: { errors } } = useForm<ExpenseFormData>({
+  const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
       title: '',
@@ -76,6 +98,52 @@ export default function AddExpenseScreen() {
   });
 
   const watchAmount = watch('amount');
+
+  const handleDatePresetChange = (preset: 'today' | 'yesterday' | 'custom') => {
+    setDatePreset(preset);
+    if (preset === 'today') {
+      setValue('date', new Date().toISOString().split('T')[0]);
+    } else if (preset === 'yesterday') {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      setValue('date', yesterday.toISOString().split('T')[0]);
+    }
+  };
+
+  const handleTimePresetChange = (preset: 'now' | '15m' | '30m' | '1h' | 'custom') => {
+    setTimePreset(preset);
+    let timeVal = '';
+    const now = new Date();
+    if (preset === 'now') {
+      timeVal = now.toLocaleTimeString('en-US', { hour12: false }).slice(0, 5);
+    } else if (preset === '15m') {
+      const t = new Date(now.getTime() - 15 * 60 * 1000);
+      timeVal = t.toLocaleTimeString('en-US', { hour12: false }).slice(0, 5);
+    } else if (preset === '30m') {
+      const t = new Date(now.getTime() - 30 * 60 * 1000);
+      timeVal = t.toLocaleTimeString('en-US', { hour12: false }).slice(0, 5);
+    } else if (preset === '1h') {
+      const t = new Date(now.getTime() - 60 * 60 * 1000);
+      timeVal = t.toLocaleTimeString('en-US', { hour12: false }).slice(0, 5);
+    }
+    if (preset !== 'custom') {
+      setValue('time', timeVal);
+    }
+  };
+
+  const handleSplitEqually = () => {
+    const total = parseFloat(watchAmount || '0');
+    if (isNaN(total) || total <= 0) {
+      Alert.alert('Invalid Amount', 'Please enter a valid total amount first.');
+      return;
+    }
+    const splitAmt = (total / activeMembers.length).toFixed(2);
+    const equalRecord: Record<string, string> = {};
+    activeMembers.forEach((m) => {
+      equalRecord[m.uid] = splitAmt;
+    });
+    setMultiplePayers(equalRecord);
+  };
 
   if (!trip) {
     return (
@@ -123,6 +191,11 @@ export default function AddExpenseScreen() {
       }
     }
 
+    if (selectedParticipants.length === 0) {
+      Alert.alert('Validation Error', 'You must select at least one participant to split this expense with.');
+      return;
+    }
+
     try {
       const { expense } = await addExpense(
         tripId,
@@ -135,7 +208,8 @@ export default function AddExpenseScreen() {
         data.date,
         data.time,
         data.notes || '',
-        trip.members.length
+        trip.members.length,
+        selectedParticipants
       );
 
       // Create realtime FCM/In-App notifications for all members
@@ -212,6 +286,38 @@ export default function AddExpenseScreen() {
                 )}
               />
               {errors.title && <Text style={styles.errorText}>{errors.title.message}</Text>}
+
+              {/* Suggestions chips */}
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                contentContainerStyle={styles.suggestionsList}
+                style={styles.suggestionsScroll}
+              >
+                {[
+                  { emoji: '🍕', label: 'Dinner', category: 'Food' },
+                  { emoji: '🍔', label: 'Lunch', category: 'Food' },
+                  { emoji: '☕', label: 'Coffee', category: 'Food' },
+                  { emoji: '🚕', label: 'Uber/Cab', category: 'Travel' },
+                  { emoji: '⛽', label: 'Fuel', category: 'Travel' },
+                  { emoji: '🏨', label: 'Hotel Stay', category: 'Hotel' },
+                  { emoji: '🛖', label: 'Airbnb', category: 'Hotel' },
+                  { emoji: '🛒', label: 'Groceries', category: 'Shopping' },
+                  { emoji: '🍿', label: 'Cinema', category: 'Other' },
+                  { emoji: '🎟️', label: 'Tickets', category: 'Other' }
+                ].map((item) => (
+                  <TouchableOpacity
+                    key={item.label}
+                    style={styles.suggestionChip}
+                    onPress={() => {
+                      setValue('title', item.label);
+                      setValue('category', item.category as any);
+                    }}
+                  >
+                    <Text style={styles.suggestionChipText}>{item.emoji} {item.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </View>
 
             {/* Amount & Category */}
@@ -268,7 +374,14 @@ export default function AddExpenseScreen() {
 
             {/* Payer Configuration */}
             <View style={styles.payerHeader}>
-              <Text style={styles.label}>Paid By</Text>
+              <View>
+                <Text style={styles.label}>Paid By</Text>
+                {payerMode === 'multiple' && (
+                  <TouchableOpacity style={styles.splitEquallyBtn} onPress={handleSplitEqually}>
+                    <Text style={styles.splitEquallyText}>⚡ Auto split equally</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
               <View style={styles.payerModeToggle}>
                 <TouchableOpacity
                   style={[styles.toggleBtn, payerMode === 'single' && styles.toggleBtnActive]}
@@ -324,16 +437,88 @@ export default function AddExpenseScreen() {
               </View>
             )}
 
-            {/* Date & Time */}
-            <View style={styles.row}>
-              <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.label}>Date</Text>
+            {/* Split Participants (Custom Split Selection) */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Split Participants (By default, splits with everyone)</Text>
+              
+              {activeMembers.length > 4 && (
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="🔍 Search members..."
+                  placeholderTextColor={COLORS.light.textMuted}
+                  value={participantSearch}
+                  onChangeText={setParticipantSearch}
+                />
+              )}
+
+              <View style={styles.participantsContainer}>
+                {activeMembers
+                  .filter(m => m.name.toLowerCase().includes(participantSearch.toLowerCase()))
+                  .map((member) => {
+                    const isSelected = selectedParticipants.includes(member.uid);
+                    return (
+                      <TouchableOpacity
+                        key={member.uid}
+                        style={[
+                          styles.participantTag,
+                          isSelected && styles.participantTagActive
+                        ]}
+                        onPress={() => toggleParticipant(member.uid)}
+                      >
+                        <View style={styles.participantTagContent}>
+                          <User size={14} color={isSelected ? '#fff' : COLORS.light.textSecondary} />
+                          <Text style={[
+                            styles.participantTagText,
+                            isSelected && styles.participantTagTextActive
+                          ]}>
+                            {member.name}
+                          </Text>
+                        </View>
+                        {isSelected && (
+                          <View style={styles.participantCheck}>
+                            <Text style={styles.participantCheckText}>✓</Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+              </View>
+              {selectedParticipants.length === 0 && (
+                <Text style={styles.errorText}>* You must select at least one member to split the expense.</Text>
+              )}
+            </View>
+
+            {/* Date Preset Selector */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Date</Text>
+              <View style={styles.presetToggleRow}>
+                <TouchableOpacity
+                  style={[styles.presetToggleBtn, datePreset === 'today' && styles.presetToggleBtnActive]}
+                  onPress={() => handleDatePresetChange('today')}
+                >
+                  <Text style={[styles.presetToggleText, datePreset === 'today' && styles.presetToggleTextActive]}>Today</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.presetToggleBtn, datePreset === 'yesterday' && styles.presetToggleBtnActive]}
+                  onPress={() => handleDatePresetChange('yesterday')}
+                >
+                  <Text style={[styles.presetToggleText, datePreset === 'yesterday' && styles.presetToggleTextActive]}>Yesterday</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.presetToggleBtn, datePreset === 'custom' && styles.presetToggleBtnActive]}
+                  onPress={() => handleDatePresetChange('custom')}
+                >
+                  <Text style={[styles.presetToggleText, datePreset === 'custom' && styles.presetToggleTextActive]}>Custom</Text>
+                </TouchableOpacity>
+              </View>
+
+              {datePreset === 'custom' && (
                 <Controller
                   control={control}
                   name="date"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
-                      style={[styles.input, errors.date && styles.errorInput]}
+                      style={[styles.input, styles.customInputMargin, errors.date && styles.errorInput]}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -342,17 +527,53 @@ export default function AddExpenseScreen() {
                     />
                   )}
                 />
-                {errors.date && <Text style={styles.errorText}>{errors.date.message}</Text>}
+              )}
+              {errors.date && datePreset === 'custom' && <Text style={styles.errorText}>{errors.date.message}</Text>}
+            </View>
+
+            {/* Time Preset Selector */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Time</Text>
+              <View style={styles.presetToggleRow}>
+                <TouchableOpacity
+                  style={[styles.presetToggleBtn, timePreset === 'now' && styles.presetToggleBtnActive]}
+                  onPress={() => handleTimePresetChange('now')}
+                >
+                  <Text style={[styles.presetToggleText, timePreset === 'now' && styles.presetToggleTextActive]}>Now</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.presetToggleBtn, timePreset === '15m' && styles.presetToggleBtnActive]}
+                  onPress={() => handleTimePresetChange('15m')}
+                >
+                  <Text style={[styles.presetToggleText, timePreset === '15m' && styles.presetToggleTextActive]}>15m ago</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.presetToggleBtn, timePreset === '30m' && styles.presetToggleBtnActive]}
+                  onPress={() => handleTimePresetChange('30m')}
+                >
+                  <Text style={[styles.presetToggleText, timePreset === '30m' && styles.presetToggleTextActive]}>30m ago</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.presetToggleBtn, timePreset === '1h' && styles.presetToggleBtnActive]}
+                  onPress={() => handleTimePresetChange('1h')}
+                >
+                  <Text style={[styles.presetToggleText, timePreset === '1h' && styles.presetToggleTextActive]}>1h ago</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.presetToggleBtn, timePreset === 'custom' && styles.presetToggleBtnActive]}
+                  onPress={() => handleTimePresetChange('custom')}
+                >
+                  <Text style={[styles.presetToggleText, timePreset === 'custom' && styles.presetToggleTextActive]}>Custom</Text>
+                </TouchableOpacity>
               </View>
 
-              <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.label}>Time</Text>
+              {timePreset === 'custom' && (
                 <Controller
                   control={control}
                   name="time"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
-                      style={[styles.input, errors.time && styles.errorInput]}
+                      style={[styles.input, styles.customInputMargin, errors.time && styles.errorInput]}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -361,8 +582,8 @@ export default function AddExpenseScreen() {
                     />
                   )}
                 />
-                {errors.time && <Text style={styles.errorText}>{errors.time.message}</Text>}
-              </View>
+              )}
+              {errors.time && timePreset === 'custom' && <Text style={styles.errorText}>{errors.time.message}</Text>}
             </View>
 
             {/* Notes */}
@@ -715,5 +936,121 @@ const styles = StyleSheet.create({
   modalSubmitText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    fontSize: 13,
+    backgroundColor: '#fff',
+    marginBottom: SPACING.sm,
+  },
+  participantsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    backgroundColor: COLORS.light.background,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+  },
+  participantTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    borderRadius: RADIUS.round,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+    gap: 4,
+  },
+  participantTagActive: {
+    backgroundColor: COLORS.light.primary,
+    borderColor: COLORS.light.primary,
+  },
+  participantTagContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  participantTagText: {
+    fontSize: 12,
+    color: COLORS.light.textSecondary,
+  },
+  participantTagTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  participantCheck: {
+    marginLeft: 2,
+  },
+  participantCheckText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  suggestionsScroll: {
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.xs,
+  },
+  suggestionsList: {
+    gap: SPACING.xs,
+    paddingVertical: 2,
+  },
+  suggestionChip: {
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+    borderRadius: RADIUS.round,
+  },
+  suggestionChipText: {
+    fontSize: 12,
+    color: COLORS.light.textSecondary,
+  },
+  splitEquallyBtn: {
+    marginTop: 2,
+  },
+  splitEquallyText: {
+    fontSize: 12,
+    color: COLORS.light.primary,
+    fontWeight: '600',
+  },
+  presetToggleRow: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+    marginBottom: SPACING.xs,
+  },
+  presetToggleBtn: {
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: RADIUS.md,
+    flex: 1,
+    alignItems: 'center',
+  },
+  presetToggleBtnActive: {
+    backgroundColor: COLORS.light.primary,
+    borderColor: COLORS.light.primary,
+  },
+  presetToggleText: {
+    fontSize: 12,
+    color: COLORS.light.textSecondary,
+    fontWeight: '500',
+  },
+  presetToggleTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  customInputMargin: {
+    marginTop: SPACING.xs,
   },
 });

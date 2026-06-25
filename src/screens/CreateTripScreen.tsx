@@ -6,11 +6,11 @@ import {
   TextInput, 
   TouchableOpacity, 
   ScrollView, 
-  SafeAreaView, 
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
@@ -53,7 +53,9 @@ export default function CreateTripScreen() {
     { id: 'gradient_4', colors: ['#F59E0B', '#D97706'], label: 'Amber Gold' },
   ];
 
-  const { control, handleSubmit, formState: { errors } } = useForm<TripFormData>({
+  const [durationPreset, setDurationPreset] = useState<'1' | '2' | '3' | '7' | 'custom'>('7');
+
+  const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<TripFormData>({
     resolver: zodResolver(tripSchema),
     defaultValues: {
       name: '',
@@ -62,6 +64,20 @@ export default function CreateTripScreen() {
       description: '',
     }
   });
+
+  const handleDurationPresetChange = (preset: '1' | '2' | '3' | '7' | 'custom') => {
+    setDurationPreset(preset);
+    if (preset === 'custom') return;
+
+    const startVal = watch('startDate');
+    if (!startVal) return;
+    const start = new Date(startVal);
+    if (isNaN(start.getTime())) return;
+
+    const days = parseInt(preset, 10);
+    const end = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
+    setValue('expectedEndDate', end.toISOString().split('T')[0]);
+  };
 
   const onSubmit = async (data: TripFormData) => {
     if (!user) return;
@@ -142,6 +158,33 @@ export default function CreateTripScreen() {
                 )}
               />
               {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
+
+              {/* Trip Suggestions scroll */}
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                contentContainerStyle={styles.suggestionsList}
+                style={styles.suggestionsScroll}
+              >
+                {[
+                  { emoji: '🏖️', label: 'Goa Getaway' },
+                  { emoji: '⛰️', label: 'Manali Trek' },
+                  { emoji: '🗼', label: 'Paris Trip' },
+                  { emoji: '🍕', label: 'Weekend Outing' },
+                  { emoji: '🏢', label: 'Office Party' },
+                  { emoji: '🏕️', label: 'Camping Trip' }
+                ].map((item) => (
+                  <TouchableOpacity
+                    key={item.label}
+                    style={styles.suggestionChip}
+                    onPress={() => {
+                      setValue('name', item.label);
+                    }}
+                  >
+                    <Text style={styles.suggestionChipText}>{item.emoji} {item.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </View>
 
             <View style={styles.dateRow}>
@@ -155,7 +198,18 @@ export default function CreateTripScreen() {
                       <TextInput
                         style={[styles.input, styles.dateInput, errors.startDate && styles.errorInput]}
                         onBlur={onBlur}
-                        onChangeText={onChange}
+                        onChangeText={(txt) => {
+                          onChange(txt);
+                          // Re-calculate end date if a preset is active
+                          if (durationPreset !== 'custom') {
+                            const start = new Date(txt);
+                            if (!isNaN(start.getTime())) {
+                              const days = parseInt(durationPreset, 10);
+                              const end = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
+                              setValue('expectedEndDate', end.toISOString().split('T')[0]);
+                            }
+                          }
+                        }}
                         value={value}
                         placeholder="YYYY-MM-DD"
                         placeholderTextColor={COLORS.light.textMuted}
@@ -167,27 +221,52 @@ export default function CreateTripScreen() {
                 {errors.startDate && <Text style={styles.errorText}>{errors.startDate.message}</Text>}
               </View>
 
-              <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.label}>End Date</Text>
-                <Controller
-                  control={control}
-                  name="expectedEndDate"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <View style={styles.dateInputWrapper}>
-                      <TextInput
-                        style={[styles.input, styles.dateInput, errors.expectedEndDate && styles.errorInput]}
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        placeholder="YYYY-MM-DD"
-                        placeholderTextColor={COLORS.light.textMuted}
-                      />
-                      <Calendar size={18} color={COLORS.light.textSecondary} style={styles.dateIcon} />
-                    </View>
-                  )}
-                />
-                {errors.expectedEndDate && <Text style={styles.errorText}>{errors.expectedEndDate.message}</Text>}
+              <View style={[styles.inputGroup, { flex: 1.2 }]}>
+                <Text style={styles.label}>Duration Preset</Text>
+                <View style={styles.presetToggleRow}>
+                  {[
+                    { key: '1', label: '1 Day' },
+                    { key: '2', label: 'Wknd' },
+                    { key: '3', label: '3 Days' },
+                    { key: '7', label: '1 Wk' },
+                    { key: 'custom', label: 'Cust' }
+                  ].map((p) => (
+                    <TouchableOpacity
+                      key={p.key}
+                      style={[styles.presetToggleBtn, durationPreset === p.key && styles.presetToggleBtnActive]}
+                      onPress={() => handleDurationPresetChange(p.key as any)}
+                    >
+                      <Text style={[styles.presetToggleText, durationPreset === p.key && styles.presetToggleTextActive]}>{p.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>End Date</Text>
+              <Controller
+                control={control}
+                name="expectedEndDate"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.dateInputWrapper}>
+                    <TextInput
+                      style={[styles.input, styles.dateInput, errors.expectedEndDate && styles.errorInput]}
+                      onBlur={onBlur}
+                      onChangeText={(txt) => {
+                        onChange(txt);
+                        setDurationPreset('custom');
+                      }}
+                      value={value}
+                      placeholder="YYYY-MM-DD"
+                      placeholderTextColor={COLORS.light.textMuted}
+                      editable={durationPreset === 'custom'}
+                    />
+                    <Calendar size={18} color={COLORS.light.textSecondary} style={styles.dateIcon} />
+                  </View>
+                )}
+              />
+              {errors.expectedEndDate && <Text style={styles.errorText}>{errors.expectedEndDate.message}</Text>}
             </View>
 
             <View style={styles.inputGroup}>
@@ -363,6 +442,54 @@ const styles = StyleSheet.create({
   submitBtnText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  suggestionsScroll: {
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.xs,
+  },
+  suggestionsList: {
+    gap: SPACING.xs,
+    paddingVertical: 2,
+  },
+  suggestionChip: {
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+    borderRadius: RADIUS.round,
+  },
+  suggestionChipText: {
+    fontSize: 12,
+    color: COLORS.light.textSecondary,
+  },
+  presetToggleRow: {
+    flexDirection: 'row',
+    gap: 4,
+    marginBottom: SPACING.xs,
+  },
+  presetToggleBtn: {
+    backgroundColor: COLORS.light.background,
+    borderWidth: 1,
+    borderColor: COLORS.light.border,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: RADIUS.md,
+    flex: 1,
+    alignItems: 'center',
+  },
+  presetToggleBtnActive: {
+    backgroundColor: COLORS.light.primary,
+    borderColor: COLORS.light.primary,
+  },
+  presetToggleText: {
+    fontSize: 10,
+    color: COLORS.light.textSecondary,
+    fontWeight: '500',
+  },
+  presetToggleTextActive: {
+    color: '#fff',
     fontWeight: 'bold',
   },
 });

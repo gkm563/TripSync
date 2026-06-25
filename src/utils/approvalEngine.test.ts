@@ -53,17 +53,22 @@ describe('Approval Engine - voting calculations', () => {
   });
 
   describe('determineStatus', () => {
-    test('resolves pending when net score is below required majority', () => {
-      expect(determineStatus(1, 2)).toBe('pending');
-      expect(determineStatus(0, 3)).toBe('pending');
-      expect(determineStatus(-1, 2)).toBe('pending');
+    test('resolves pending when net score is below required majority and rejects are below majority', () => {
+      expect(determineStatus({ u1: 1, u2: -1 }, 2)).toBe('pending');
+      expect(determineStatus({ u1: 1 }, 2)).toBe('pending');
+      expect(determineStatus({ u1: 1, u2: -1, u3: -1 }, 3)).toBe('pending');
     });
 
     test('resolves approved when net score meets or exceeds required majority', () => {
-      expect(determineStatus(2, 2)).toBe('approved');
-      expect(determineStatus(3, 2)).toBe('approved');
-      expect(determineStatus(3, 3)).toBe('approved');
-      expect(determineStatus(5, 3)).toBe('approved');
+      expect(determineStatus({ u1: 1, u2: 1 }, 2)).toBe('approved');
+      expect(determineStatus({ u1: 1, u2: 1, u3: 1 }, 2)).toBe('approved');
+      expect(determineStatus({ u1: 1, u2: 1, u3: 1 }, 3)).toBe('approved');
+    });
+
+    test('resolves rejected when reject count meets or exceeds required majority', () => {
+      expect(determineStatus({ u1: 1, u2: -1, u3: -1 }, 2)).toBe('rejected');
+      expect(determineStatus({ u1: -1, u2: -1 }, 2)).toBe('rejected');
+      expect(determineStatus({ u1: -1, u2: -1, u3: -1 }, 3)).toBe('rejected');
     });
   });
 });

@@ -12,7 +12,8 @@ import {
   Dimensions,
   Alert,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  Clipboard
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -62,6 +63,8 @@ export default function TripDetailScreen() {
     activityLogs, 
     addPersonalExpense,
     deletePersonalExpense,
+    deleteExpense,
+    forceApproveExpense,
     voteExpense,
     syncExpenses, 
     syncPersonalExpenses, 
@@ -110,6 +113,8 @@ export default function TripDetailScreen() {
   const tripExpenses = expenses.filter(e => e.tripId === tripId);
   const approvedExpenses = tripExpenses.filter(e => e.status === 'approved');
   const pendingExpenses = tripExpenses.filter(e => e.status === 'pending');
+  const rejectedExpenses = tripExpenses.filter(e => e.status === 'rejected');
+  const tripPersonalExpenses = personalExpenses.filter(p => p.tripId === tripId && p.userId === (user?.uid || ''));
   const majorityNeeded = Math.floor(trip.members.length / 2) + 1;
 
   // Calculate live settlements
@@ -153,6 +158,50 @@ export default function TripDetailScreen() {
     } finally {
       setInviteLoading(false);
     }
+  };
+
+  const handleForceApprove = async (expenseId: string) => {
+    if (!user) return;
+    try {
+      await forceApproveExpense(expenseId, user.uid, user.name);
+      
+      const exp = expenses.find(e => e.id === expenseId);
+      if (exp && exp.createdBy !== user.uid) {
+        await addNotification(
+          exp.createdBy,
+          'Expense Approved Anyway',
+          `${user.name} approved the rejected expense "${exp.title}" (₹${exp.amount})`,
+          'expense_approved',
+          tripId,
+          expenseId
+        );
+      }
+      Alert.alert('Approved', 'Expense approved by group decision.');
+    } catch (e: any) {
+      Alert.alert('Error', e.message || 'Failed to approve expense');
+    }
+  };
+
+  const handleDeleteRejected = async (expenseId: string) => {
+    Alert.alert(
+      'Delete Rejected Expense',
+      'Are you sure you want to permanently delete this rejected expense from the trip history?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteExpense(expenseId);
+              Alert.alert('Deleted', 'Rejected expense deleted.');
+            } catch (e: any) {
+              Alert.alert('Error', e.message || 'Failed to delete expense');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handleAddPersonal = async () => {
@@ -317,35 +366,35 @@ export default function TripDetailScreen() {
             style={[styles.tabItem, activeTab === 'dashboard' && styles.activeTabItem]}
             onPress={() => setActiveTab('dashboard')}
           >
-            <Grid size={16} color={activeTab === 'dashboard' ? COLORS.light.primary : COLORS.light.textSecondary} />
+            <Grid size={16} color={activeTab === 'dashboard' ? '#fff' : COLORS.light.textSecondary} />
             <Text style={[styles.tabText, activeTab === 'dashboard' && styles.activeTabText]}>Dashboard</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.tabItem, activeTab === 'expenses' && styles.activeTabItem]}
             onPress={() => setActiveTab('expenses')}
           >
-            <DollarSign size={16} color={activeTab === 'expenses' ? COLORS.light.primary : COLORS.light.textSecondary} />
+            <DollarSign size={16} color={activeTab === 'expenses' ? '#fff' : COLORS.light.textSecondary} />
             <Text style={[styles.tabText, activeTab === 'expenses' && styles.activeTabText]}>Expenses</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.tabItem, activeTab === 'settlement' && styles.activeTabItem]}
             onPress={() => setActiveTab('settlement')}
           >
-            <Users size={16} color={activeTab === 'settlement' ? COLORS.light.primary : COLORS.light.textSecondary} />
+            <Users size={16} color={activeTab === 'settlement' ? '#fff' : COLORS.light.textSecondary} />
             <Text style={[styles.tabText, activeTab === 'settlement' && styles.activeTabText]}>Settlement</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.tabItem, activeTab === 'activity' && styles.activeTabItem]}
             onPress={() => setActiveTab('activity')}
           >
-            <History size={16} color={activeTab === 'activity' ? COLORS.light.primary : COLORS.light.textSecondary} />
+            <History size={16} color={activeTab === 'activity' ? '#fff' : COLORS.light.textSecondary} />
             <Text style={[styles.tabText, activeTab === 'activity' && styles.activeTabText]}>Timeline</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.tabItem, activeTab === 'personal' && styles.activeTabItem]}
             onPress={() => setActiveTab('personal')}
           >
-            <Lock size={16} color={activeTab === 'personal' ? COLORS.light.primary : COLORS.light.textSecondary} />
+            <Lock size={16} color={activeTab === 'personal' ? '#fff' : COLORS.light.textSecondary} />
             <Text style={[styles.tabText, activeTab === 'personal' && styles.activeTabText]}>Personal</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -414,6 +463,71 @@ export default function TripDetailScreen() {
         {/* Tab 2: Shared Expenses */}
         {activeTab === 'expenses' && (
           <View>
+            {/* Rejected / Disputed Section */}
+            {rejectedExpenses.length > 0 && (
+              <View style={[styles.pendingQueueSection, { backgroundColor: 'rgba(239, 68, 68, 0.02)', borderColor: 'rgba(239, 68, 68, 0.15)' }]}>
+                <Text style={[styles.subSectionHeader, { color: COLORS.light.error }]}>
+                  Pending Decision / Disputed ({rejectedExpenses.length})
+                </Text>
+                <Text style={{ fontSize: 11, color: COLORS.light.textSecondary, marginBottom: SPACING.md, marginTop: -4 }}>
+                  These expenses were majority rejected. Any member can force-approve or permanently delete them.
+                </Text>
+                {rejectedExpenses.map((exp) => {
+                  return (
+                    <View key={exp.id} style={[styles.pendingExpenseCard, { borderColor: 'rgba(239, 68, 68, 0.2)' }]}>
+                      <View style={styles.pendingMainRow}>
+                        <View style={[styles.expCategoryBadge, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+                          <Text style={[styles.catBadgeText, { color: COLORS.light.error }]}>{exp.category}</Text>
+                        </View>
+                        <Text style={styles.pendingExpTitle}>{exp.title}</Text>
+                        <Text style={[styles.pendingExpAmount, { color: COLORS.light.error }]}>₹{exp.amount}</Text>
+                      </View>
+                      
+                      <Text style={styles.pendingCreatedBy}>
+                        Paid by {getUserNameById(Object.keys(exp.paidBy)[0] || '')} • Created by {getUserNameById(exp.createdBy)}
+                      </Text>
+
+                      <View style={[styles.pendingVotesRow, { marginTop: SPACING.sm }]}>
+                        <View style={styles.votingActionRow}>
+                          <TouchableOpacity
+                            style={[
+                              styles.voteMiniBtn, 
+                              { backgroundColor: 'rgba(16, 185, 129, 0.08)', borderColor: 'rgba(16, 185, 129, 0.2)', paddingHorizontal: 12 }
+                            ]}
+                            onPress={() => handleForceApprove(exp.id)}
+                            disabled={trip.status === 'completed'}
+                          >
+                            <Text style={[styles.voteMiniText, { color: COLORS.light.success, fontSize: 11 }]}>Approve Anyway</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[
+                              styles.voteMiniBtn, 
+                              { backgroundColor: 'rgba(239, 68, 68, 0.08)', borderColor: 'rgba(239, 68, 68, 0.2)', paddingHorizontal: 12 }
+                            ]}
+                            onPress={() => handleDeleteRejected(exp.id)}
+                            disabled={trip.status === 'completed'}
+                          >
+                            <Text style={[styles.voteMiniText, { color: COLORS.light.error, fontSize: 11 }]}>Delete</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+
+                      {Object.keys(exp.rejectReasons || {}).length > 0 && (
+                        <View style={styles.rejectionReasonsBox}>
+                          <Text style={styles.rejectionsTitle}>Rejection Comments:</Text>
+                          {Object.entries(exp.rejectReasons).map(([uid, r]) => (
+                            <Text key={uid} style={styles.rejectionText}>
+                              • <Text style={styles.boldText}>{getUserNameById(uid)}</Text>: {r}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
             {/* Pending Approvals Review Section */}
             {pendingExpenses.length > 0 && (
               <View style={styles.pendingQueueSection}>
@@ -647,7 +761,8 @@ export default function TripDetailScreen() {
                           <TouchableOpacity
                             style={styles.completedUpiBtn}
                             onPress={() => {
-                              Alert.alert('Copied UPI ID', `UPI ID for ${getUserNameById(tx.to)}:\n${upiId}\ncopied to clipboard!`);
+                              Clipboard.setString(upiId);
+                              Alert.alert('UPI ID Copied', `UPI ID for ${getUserNameById(tx.to)}: "${upiId}" has been copied to clipboard.`);
                             }}
                           >
                             <Copy size={12} color="#fff" />
@@ -710,7 +825,12 @@ export default function TripDetailScreen() {
                         <Text style={styles.debtAmountValue}>₹{tx.amount.toLocaleString()}</Text>
                         <TouchableOpacity
                           style={styles.upiCopyBtn}
-                          onPress={() => Alert.alert('Copied', 'UPI ID copied to clipboard!')}
+                          onPress={() => {
+                            const creditorUser = usersList.find(u => u.uid === tx.to);
+                            const upiId = creditorUser?.upiId || (creditorUser?.email ? `${creditorUser.email.split('@')[0]}@okaxis` : `${(getUserNameById(tx.to) || 'user').toLowerCase().replace(/\s+/g, '')}@okaxis`);
+                            Clipboard.setString(upiId);
+                            Alert.alert('UPI ID Copied', `UPI ID for ${getUserNameById(tx.to)}: "${upiId}" has been copied to clipboard.`);
+                          }}
                         >
                           <Copy size={14} color={COLORS.light.primary} />
                           <Text style={styles.upiBtnText}>Copy UPI</Text>
@@ -806,7 +926,7 @@ export default function TripDetailScreen() {
             <View style={styles.personalTotalCard}>
               <Text style={styles.persTitle}>Your Private Personal Expenses</Text>
               <Text style={styles.persAmount}>
-                ₹{personalExpenses.reduce((sum, p) => sum + p.amount, 0).toLocaleString()}
+                ₹{tripPersonalExpenses.reduce((sum, p) => sum + p.amount, 0).toLocaleString()}
               </Text>
               <Text style={styles.persNotice}>These numbers are hidden from other trip members.</Text>
             </View>
@@ -855,10 +975,10 @@ export default function TripDetailScreen() {
             {/* List */}
             <View style={styles.whiteCard}>
               <Text style={styles.cardTitle}>Private Items</Text>
-              {personalExpenses.length === 0 ? (
+              {tripPersonalExpenses.length === 0 ? (
                 <Text style={styles.emptyLogsText}>No private expenses logged.</Text>
               ) : (
-                personalExpenses.map((exp) => (
+                tripPersonalExpenses.map((exp) => (
                   <View key={exp.id} style={styles.personalItem}>
                     <View>
                       <Text style={styles.personalItemTitle}>{exp.title}</Text>
@@ -1000,33 +1120,32 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   tabsContainer: {
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderColor: COLORS.light.border,
+    backgroundColor: '#F8FAFC',
+    paddingVertical: SPACING.sm,
   },
   tabsScroll: {
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
+    gap: 8,
   },
   tabItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    marginRight: SPACING.xs,
-    borderRadius: RADIUS.md,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: RADIUS.round,
+    backgroundColor: '#E2E8F0',
   },
   activeTabItem: {
-    backgroundColor: 'rgba(99, 102, 241, 0.08)',
+    backgroundColor: COLORS.light.primary,
   },
   tabText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.light.textSecondary,
   },
   activeTabText: {
-    color: COLORS.light.primary,
+    color: '#fff',
   },
   scrollContent: {
     padding: SPACING.md,

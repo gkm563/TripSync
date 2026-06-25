@@ -16,11 +16,16 @@ export function calculateNetScore(votes: Record<string, number>): number {
 }
 
 /**
- * Determines the status of an expense based on the net score and majority threshold.
+ * Determines the status of an expense based on the votes map and majority threshold.
  */
 export function determineStatus(
-  netScore: number, 
+  votes: Record<string, number>, 
   requiredMajority: number
-): 'approved' | 'pending' {
-  return netScore >= requiredMajority ? 'approved' : 'pending';
+): 'approved' | 'rejected' | 'pending' {
+  const netScore = Object.values(votes).reduce((sum, val) => sum + val, 0);
+  const rejectCount = Object.values(votes).filter(v => v === -1).length;
+
+  if (netScore >= requiredMajority) return 'approved';
+  if (rejectCount >= requiredMajority) return 'rejected';
+  return 'pending';
 }

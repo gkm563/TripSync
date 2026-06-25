@@ -274,4 +274,41 @@ describe('Settlement Engine - calculateSettlement', () => {
     expect(result.balances['rohit_uid']).toBe(-200);
     expect(result.balances['praveen_uid']).toBe(-200);
   });
+
+  test('custom participants split - only subset owes money', () => {
+    const expenses: Expense[] = [
+      {
+        id: '1',
+        tripId: 't1',
+        title: 'Snack A and C only',
+        amount: 120,
+        category: 'Food',
+        paidBy: { gautam_uid: 120 },
+        createdBy: 'gautam_uid',
+        createdAt: new Date().toISOString(),
+        date: '2026-06-09',
+        time: '12:00',
+        status: 'approved',
+        votes: {},
+        rejectReasons: {},
+        version: 1,
+        updatedAt: new Date().toISOString(),
+        updatedBy: 'gautam_uid',
+        participants: ['gautam_uid', 'praveen_uid'], // rohit_uid is excluded
+      },
+    ];
+
+    const result = calculateSettlement(members, expenses);
+
+    expect(result.totalExpense).toBe(120);
+    expect(result.perMember).toBe(40);
+    expect(result.balances['gautam_uid']).toBe(60);
+    expect(result.balances['rohit_uid']).toBe(0);
+    expect(result.balances['praveen_uid']).toBe(-60);
+
+    expect(result.transactions).toHaveLength(1);
+    expect(result.transactions[0].from).toBe('praveen_uid');
+    expect(result.transactions[0].to).toBe('gautam_uid');
+    expect(result.transactions[0].amount).toBe(60);
+  });
 });

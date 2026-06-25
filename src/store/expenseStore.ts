@@ -36,7 +36,8 @@ interface ExpenseState {
     date: string,
     time: string,
     notes?: string,
-    totalMembersCount?: number
+    totalMembersCount?: number,
+    participants?: string[]
   ) => Promise<{ expense: Expense; duplicateWarning: boolean }>;
 
   editExpense: (
@@ -50,7 +51,16 @@ interface ExpenseState {
     date: string,
     time: string,
     notes?: string,
-    totalMembersCount?: number
+    totalMembersCount?: number,
+    participants?: string[]
+  ) => Promise<void>;
+
+  deleteExpense: (expenseId: string) => Promise<void>;
+  
+  forceApproveExpense: (
+    expenseId: string,
+    userId: string,
+    userName: string
   ) => Promise<void>;
 
   voteExpense: (
@@ -137,7 +147,8 @@ export const useExpenseStore = create<ExpenseState>()(
         date,
         time,
         notes = '',
-        totalMembersCount = 1
+        totalMembersCount = 1,
+        participants
       ) => {
         set({ loading: true, error: null });
 
@@ -168,6 +179,7 @@ export const useExpenseStore = create<ExpenseState>()(
           version: 1,
           updatedAt: new Date().toISOString(),
           updatedBy: createdBy,
+          participants,
         };
 
         try {
@@ -207,7 +219,8 @@ export const useExpenseStore = create<ExpenseState>()(
         date,
         time,
         notes = '',
-        totalMembersCount = 1
+        totalMembersCount = 1,
+        participants
       ) => {
         set({ loading: true, error: null });
         try {
@@ -241,6 +254,7 @@ export const useExpenseStore = create<ExpenseState>()(
             rejectReasons: currentExpense.rejectReasons,
             updatedBy: currentExpense.updatedBy,
             updatedAt: currentExpense.updatedAt,
+            participants: currentExpense.participants,
           };
 
           // 2. Prepare the updated fields
@@ -265,6 +279,7 @@ export const useExpenseStore = create<ExpenseState>()(
             version: currentExpense.version + 1,
             updatedAt: new Date().toISOString(),
             updatedBy,
+            participants,
           };
 
           if (USE_FIREBASE && db) {
@@ -330,10 +345,9 @@ export const useExpenseStore = create<ExpenseState>()(
             delete rejectReasons[userId];
           }
 
-          // Net vote score
-          const netScore = calculateNetScore(votes);
+          // Status determination using votes map
           const majority = getRequiredMajority(totalMembersCount);
-          const status = determineStatus(netScore, majority);
+          const status = determineStatus(votes, majority);
 
           const updatedExpense: Expense = {
             ...currentExpense,
@@ -359,6 +373,82 @@ export const useExpenseStore = create<ExpenseState>()(
             userName,
             `${userName} ${voteType} expense: "${currentExpense.title}"${vote === -1 ? ` (${rejectReason})` : ''}`,
             vote === 1 ? 'expense_approved' : 'expense_rejected'
+          );
+        } catch (err: any) {
+          set({ error: err.message });
+          throw err;
+        }
+      },
+
+      deleteExpense: async (expenseId) => {
+        try {
+          let currentExpense = get().expenses.find((e) => e.id === expenseId);
+
+          if (USE_FIREBASE && db) {
+            if (!currentExpense) {
+              const expSnap = await getDoc(doc(db, 'expenses', expenseId));
+              if (expSnap.exists()) {
+                currentExpense = expSnap.data() as Expense;
+              }
+            }
+            await deleteDoc(doc(db, 'expenses', expenseId));
+          } else {
+            set((state) => ({
+              expenses: state.expenses.filter((e) => e.id !== expenseId),
+            }));
+          }
+
+          if (currentExpense) {
+            await get().logActivity(
+              currentExpense.tripId,
+              'system',
+              'System',
+              `Rejected expense "${currentExpense.title}" (₹${currentExpense.amount}) was deleted by the group`,
+              'expense_rejected'
+            );
+          }
+        } catch (err: any) {
+          set({ error: err.message });
+          throw err;
+        }
+      },
+
+      forceApproveExpense: async (expenseId, userId, userName) => {
+        try {
+          let currentExpense = get().expenses.find((e) => e.id === expenseId);
+
+          if (USE_FIREBASE && db) {
+            const expSnap = await getDoc(doc(db, 'expenses', expenseId));
+            if (expSnap.exists()) {
+              currentExpense = expSnap.data() as Expense;
+            }
+          }
+
+          if (!currentExpense) {
+            throw new Error('Expense not found');
+          }
+
+          const updatedExpense: Expense = {
+            ...currentExpense,
+            status: 'approved',
+            updatedAt: new Date().toISOString(),
+            updatedBy: userId,
+          };
+
+          if (USE_FIREBASE && db) {
+            await setDoc(doc(db, 'expenses', expenseId), updatedExpense);
+          } else {
+            set((state) => ({
+              expenses: state.expenses.map((e) => (e.id === expenseId ? updatedExpense : e)),
+            }));
+          }
+
+          await get().logActivity(
+            currentExpense.tripId,
+            userId,
+            userName,
+            `${userName} approved rejected expense: "${currentExpense.title}"`,
+            'expense_approved'
           );
         } catch (err: any) {
           set({ error: err.message });

@@ -3,15 +3,7 @@ import { Platform } from 'react-native';
 // Helper to check if notifications are supported and should be enabled (not in Expo Go)
 const shouldEnableNotifications = (): boolean => {
   if (Platform.OS === 'web') return false;
-  
-  try {
-    const Constants = require('expo-constants').default;
-    // appOwnership is 'expo' when running inside Expo Go
-    const isExpoGo = Constants?.appOwnership === 'expo';
-    return !isExpoGo;
-  } catch (e) {
-    return true; // Fallback to true in bare workflows/development clients
-  }
+  return true;
 };
 
 const getNotificationsModule = () => {

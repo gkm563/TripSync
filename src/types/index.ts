@@ -46,12 +46,13 @@ export interface Expense {
   date: string; // YYYY-MM-DD
   time: string; // HH:mm
   notes?: string;
-  status: 'pending' | 'approved';
+  status: 'pending' | 'approved' | 'rejected';
   votes: Record<string, number>; // userId -> 1 (approve) or -1 (reject)
   rejectReasons: Record<string, string>; // userId -> reason text
   version: number;
   updatedAt: Date | any;
   updatedBy: string;
+  participants?: string[]; // UIDs of members who participated in this expense
 }
 
 export interface ExpenseVersion {
@@ -65,11 +66,12 @@ export interface ExpenseVersion {
   notes?: string;
   date: string;
   time: string;
-  status: 'pending' | 'approved';
+  status: 'pending' | 'approved' | 'rejected';
   votes: Record<string, number>;
   rejectReasons: Record<string, string>;
   updatedBy: string;
   updatedAt: Date | any;
+  participants?: string[];
 }
 
 export interface Vote {

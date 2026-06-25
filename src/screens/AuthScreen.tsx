@@ -67,7 +67,7 @@ export default function AuthScreen() {
 
   return (
     <LinearGradient
-      colors={COLORS.dark.primaryGradient as any}
+      colors={['#0F172A', '#1E1B4B', '#2E1065']}
       style={styles.container}
     >
       <KeyboardAvoidingView
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.light.primary,
+    color: '#6366F1',
   },
   appName: {
     fontSize: 32,
@@ -248,39 +248,41 @@ const styles = StyleSheet.create({
   },
   appTagline: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(255, 255, 255, 0.7)',
     marginTop: SPACING.xs,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(30, 41, 59, 0.75)',
     borderRadius: RADIUS.xl,
     padding: SPACING.xl,
-    ...SHADOWS.light.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...SHADOWS.dark.lg,
   },
   cardTitle: {
     fontSize: TYPOGRAPHY.h2.fontSize,
     fontWeight: TYPOGRAPHY.h2.fontWeight,
-    color: COLORS.light.text,
+    color: '#fff',
   },
   cardSubtitle: {
     fontSize: 14,
-    color: COLORS.light.textSecondary,
+    color: 'rgba(255, 255, 255, 0.5)',
     marginTop: SPACING.xs,
     marginBottom: SPACING.lg,
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
     padding: SPACING.md,
     borderRadius: RADIUS.md,
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: 'rgba(239, 68, 68, 0.25)',
   },
   errorText: {
     fontSize: 13,
-    color: COLORS.light.error,
+    color: '#F87171',
     marginLeft: SPACING.sm,
     flex: 1,
   },
@@ -290,18 +292,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: COLORS.light.textSecondary,
+    color: 'rgba(255, 255, 255, 0.8)',
     marginBottom: SPACING.xs,
   },
   input: {
     height: 48,
     borderWidth: 1,
-    borderColor: COLORS.light.border,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
     borderRadius: RADIUS.md,
     paddingHorizontal: SPACING.md,
     fontSize: 15,
-    color: COLORS.light.text,
-    backgroundColor: COLORS.light.background,
+    color: '#fff',
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
   },
   submitButton: {
     flexDirection: 'row',
@@ -312,7 +314,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: SPACING.md,
     gap: SPACING.sm,
-    ...SHADOWS.light.md,
+    ...SHADOWS.dark.md,
   },
   submitButtonText: {
     color: '#fff',
@@ -324,17 +326,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toggleText: {
-    color: COLORS.light.primary,
+    color: '#818CF8',
     fontSize: 14,
     fontWeight: '500',
   },
   mockSection: {
     marginTop: SPACING.xxl,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(30, 41, 59, 0.45)',
     padding: SPACING.lg,
     borderRadius: RADIUS.xl,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   mockHeaderTitle: {
     fontSize: 16,
@@ -344,7 +346,7 @@ const styles = StyleSheet.create({
   },
   mockHeaderSub: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
     marginBottom: SPACING.md,
     marginTop: SPACING.xs,
@@ -356,26 +358,29 @@ const styles = StyleSheet.create({
   },
   mockProfileCard: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     alignItems: 'center',
-    ...SHADOWS.light.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   mockAvatar: {
     width: 48,
     height: 48,
     borderRadius: RADIUS.round,
     marginBottom: SPACING.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   mockName: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: COLORS.light.text,
+    color: '#fff',
   },
   mockRole: {
     fontSize: 11,
-    color: COLORS.light.textSecondary,
+    color: 'rgba(255, 255, 255, 0.5)',
     marginTop: 2,
   },
   passwordInputWrapper: {
@@ -383,16 +388,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 48,
     borderWidth: 1,
-    borderColor: COLORS.light.border,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
     borderRadius: RADIUS.md,
-    backgroundColor: COLORS.light.background,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
   },
   passwordInput: {
     flex: 1,
     height: '100%',
     paddingHorizontal: SPACING.md,
     fontSize: 15,
-    color: COLORS.light.text,
+    color: '#fff',
   },
   eyeButton: {
     paddingHorizontal: SPACING.md,

@@ -81,6 +81,30 @@ export const useNotificationStore = create<NotificationState>()(
             });
           }
 
+          // Trigger a local system notification (pops up in the system notification tray)
+          try {
+            let NotificationsInstance: any = null;
+            try {
+              NotificationsInstance = require('expo-notifications');
+            } catch (e) {
+              // Ignore if not loaded
+            }
+
+            if (NotificationsInstance) {
+              await NotificationsInstance.scheduleNotificationAsync({
+                content: {
+                  title: title,
+                  body: body,
+                  data: { tripId, expenseId, type },
+                  sound: true,
+                },
+                trigger: null, // deliver immediately
+              });
+            }
+          } catch (localErr) {
+            console.warn('Failed to schedule local notification:', localErr);
+          }
+
           // Fetch the recipient's push token
           let recipientToken: string | null = null;
           if (USE_FIREBASE && db) {

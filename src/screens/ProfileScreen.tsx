@@ -32,19 +32,9 @@ const PRESET_AVATARS = [
 ];
 
 // Helper function to reliably convert file URIs to Blobs on React Native
-const uriToBlob = (uri: string): Promise<Blob> => {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = function () {
-      resolve(xhr.response);
-    };
-    xhr.onerror = function () {
-      reject(new Error('Failed to convert image URI to blob'));
-    };
-    xhr.responseType = 'blob';
-    xhr.open('GET', uri, true);
-    xhr.send(null);
-  });
+const uriToBlob = async (uri: string): Promise<Blob> => {
+  const response = await fetch(uri);
+  return await response.blob();
 };
 
 export default function ProfileScreen() {
@@ -141,6 +131,14 @@ export default function ProfileScreen() {
     if (!editName.trim()) {
       Alert.alert('Validation Error', 'Name cannot be empty.');
       return;
+    }
+
+    if (editUpiId.trim()) {
+      const upiPattern = /^[\w.\-_]+@[\w\-]+$/;
+      if (!upiPattern.test(editUpiId.trim())) {
+        Alert.alert('Validation Error', 'Please enter a valid UPI ID (e.g. username@upi or name@okaxis).');
+        return;
+      }
     }
 
     setSaving(true);

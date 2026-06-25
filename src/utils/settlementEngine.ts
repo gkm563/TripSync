@@ -21,39 +21,49 @@ export function calculateSettlement(
 ): SettlementResult {
   const totalMembers = members.length;
   
-  // 1. Initialize contributions for all active members
+  // 1. Initialize contributions and balances for all active members
   const contributions: Record<string, number> = {};
+  const balances: Record<string, number> = {};
   members.forEach((uid) => {
     contributions[uid] = 0;
+    balances[uid] = 0;
   });
 
-  // 2. Sum contributions from approved expenses
+  // 2. Sum contributions and compute balances expense-by-expense
   approvedExpenses.forEach((exp) => {
     if (exp.status !== 'approved') return;
     
     // Sum who paid what
     Object.entries(exp.paidBy).forEach(([uid, amount]) => {
-      // Only count contributions of currently active members
       if (members.includes(uid)) {
         contributions[uid] = (contributions[uid] || 0) + amount;
+        balances[uid] = (balances[uid] || 0) + amount;
       }
     });
+
+    // Identify participants of this expense
+    const expParticipants = exp.participants && exp.participants.length > 0
+      ? exp.participants.filter((uid) => members.includes(uid))
+      : members;
+
+    const participantCount = expParticipants.length;
+    if (participantCount > 0) {
+      const sharePerParticipant = exp.amount / participantCount;
+      expParticipants.forEach((uid) => {
+        balances[uid] = (balances[uid] || 0) - sharePerParticipant;
+      });
+    }
   });
 
   // 3. Compute total group expense
   const totalExpense = Object.values(contributions).reduce((sum, val) => sum + val, 0);
 
-  // 4. Compute per-member share (rounded to 2 decimal places)
+  // 4. Compute per-member share
   const perMember = totalMembers > 0 ? parseFloat((totalExpense / totalMembers).toFixed(2)) : 0;
 
-  // 5. Compute net balances
-  // Balance = Contribution - Share
-  // Positive balance = Creditor (is owed money)
-  // Negative balance = Debtor (owes money)
-  const balances: Record<string, number> = {};
+  // 5. Round final balances
   members.forEach((uid) => {
-    const balance = contributions[uid] - perMember;
-    balances[uid] = parseFloat(balance.toFixed(2));
+    balances[uid] = parseFloat((balances[uid] || 0).toFixed(2));
   });
 
   // 6. Greedy Transaction Minimizer
