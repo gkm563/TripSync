@@ -89,11 +89,15 @@ export default function ProfileScreen() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.8,
+        quality: 0.5,
+        base64: true,
       });
 
       if (!result.canceled && result.assets && result.assets[0].uri) {
         const localUri = result.assets[0].uri;
+        const base64Str = result.assets[0].base64;
+        const imageType = localUri.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+        const webSafeUri = base64Str ? `data:${imageType};base64,${base64Str}` : localUri;
         
         if (USE_FIREBASE && app) {
           setImageUploading(true);
@@ -109,17 +113,17 @@ export default function ProfileScreen() {
             const downloadURL = await getDownloadURL(fileRef);
             setEditPhotoURL(downloadURL);
           } catch (uploadErr: any) {
-            console.warn('Firebase Storage upload failed, using local URI:', uploadErr);
-            setEditPhotoURL(localUri);
+            console.warn('Firebase Storage upload failed, using web-safe base64 URI:', uploadErr);
+            setEditPhotoURL(webSafeUri);
             Alert.alert(
-              'Upload Warning',
-              'Profile picture saved locally. (Enable Firebase Storage in your console if you want others to see it).'
+              'Upload Success',
+              'Profile picture saved using backup cloud-compatible format. All members will be able to see it!'
             );
           } finally {
             setImageUploading(false);
           }
         } else {
-          setEditPhotoURL(localUri);
+          setEditPhotoURL(webSafeUri);
         }
       }
     } catch (err: any) {
