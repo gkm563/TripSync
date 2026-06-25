@@ -524,6 +524,7 @@ export const useExpenseStore = create<ExpenseState>()(
       },
 
       syncExpenses: (tripId) => {
+        if (!tripId) return () => {};
         if (USE_FIREBASE && db) {
           const q = query(collection(db, 'expenses'), where('tripId', '==', tripId));
           const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -541,6 +542,7 @@ export const useExpenseStore = create<ExpenseState>()(
       },
 
       syncPersonalExpenses: (tripId, userId) => {
+        if (!tripId || !userId) return () => {};
         if (USE_FIREBASE && db) {
           const q = query(
             collection(db, 'personalExpenses'), 
@@ -562,6 +564,7 @@ export const useExpenseStore = create<ExpenseState>()(
       },
 
       syncActivityLogs: (tripId) => {
+        if (!tripId) return () => {};
         if (USE_FIREBASE && db) {
           const q = query(collection(db, 'activityLogs'), where('tripId', '==', tripId));
           const unsubscribe = onSnapshot(q, (snapshot) => {

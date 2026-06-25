@@ -272,6 +272,7 @@ export const useTripStore = create<TripState>()(
       },
 
       syncTrips: (userId) => {
+        if (!userId) return () => {};
         if (USE_FIREBASE && db) {
           const q = query(collection(db, 'trips'), where('members', 'array-contains', userId));
           const unsubscribe = onSnapshot(q, (snapshot) => {

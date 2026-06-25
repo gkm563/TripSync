@@ -255,12 +255,12 @@ export const useAuthStore = create<AuthState>()(
 
       updateFcmToken: async (token: string) => {
         const currentUser = get().user;
-        if (!currentUser) return;
+        if (!currentUser || !currentUser.uid || !token) return;
         
         const updatedUser = { ...currentUser, fcmToken: token };
         set({ user: updatedUser });
 
-        if (USE_FIREBASE) {
+        if (USE_FIREBASE && db) {
           try {
             await setDoc(doc(db, 'users', currentUser.uid), { fcmToken: token }, { merge: true });
           } catch (e) {

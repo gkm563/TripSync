@@ -208,6 +208,7 @@ export const useNotificationStore = create<NotificationState>()(
       },
 
       clearHistory: async (userId) => {
+        if (!userId) return;
         try {
           if (USE_FIREBASE && db) {
             const q = query(collection(db, 'notifications'), where('userId', '==', userId));
@@ -226,6 +227,7 @@ export const useNotificationStore = create<NotificationState>()(
       },
 
       syncNotifications: (userId) => {
+        if (!userId) return () => {};
         if (USE_FIREBASE && db) {
           const q = query(collection(db, 'notifications'), where('userId', '==', userId));
           const unsubscribe = onSnapshot(q, (snapshot) => {
