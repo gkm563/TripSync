@@ -1,5 +1,6 @@
 # 🚀 TripSync — Premium Group Contribution & Settlement Tracker
 
+[![Live Website](https://img.shields.io/badge/Live_Site-gkm563.github.io/TripSync-teal?style=for-the-badge&logo=github&logoColor=white)](https://gkm563.github.io/TripSync/)
 [![Expo Version](https://img.shields.io/badge/Expo-v54.0.0-blue?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
 [![React Native](https://img.shields.io/badge/React_Native-v0.81.5-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactnative.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-v12.14.0-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
@@ -212,6 +213,42 @@ To install and run the application in a local development environment:
     npm start
     ```
     *   Scan the QR code printed in the terminal with your **Expo Go** application (Android) or **Camera** application (iOS) to launch the app.
+
+### 🌐 Web Application Setup & Deployment
+The repository contains a fully responsive Vite-powered React marketing portal and web dashboard in the `/web` subdirectory. The live site is hosted at **[https://gkm563.github.io/TripSync/](https://gkm563.github.io/TripSync/)**.
+
+#### 1. Setup Web Env Configuration
+Create a `.env` file inside the `web/` folder with your Firebase web parameters:
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_DATABASE_URL=your_database_url
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+```
+
+#### 2. Run Local Dev Server
+Navigate to the web folder and launch the dev environment:
+```bash
+cd web
+npm install
+npm run dev
+```
+
+#### 3. Build Static Bundle
+Generate static relative assets for deployment:
+```bash
+npm run build
+```
+Build files will be generated in `web/dist`.
+
+#### 4. Deploy to GitHub Pages
+To publish updates live:
+```bash
+npx gh-pages -d web/dist
+```
 
 ---
 
