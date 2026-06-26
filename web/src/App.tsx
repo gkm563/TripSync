@@ -18,8 +18,19 @@ import { Press } from './components/marketing/Press';
 import { LegalPrivacy } from './components/marketing/LegalPrivacy';
 import { Contact } from './components/marketing/Contact';
 
+export const getBasePath = () => {
+  return window.location.pathname.startsWith('/TripSync') ? '/TripSync' : '';
+};
+
 const getInitialPage = () => {
-  let path = window.location.pathname.replace(/^\/|\/$/g, '');
+  const base = getBasePath();
+  let path = window.location.pathname;
+  
+  if (base && path.startsWith(base)) {
+    path = path.slice(base.length);
+  }
+  
+  path = path.replace(/^\/|\/$/g, '');
   
   // Check hash for GitHub Pages redirects / hash routes
   if (window.location.hash) {
@@ -72,7 +83,8 @@ function App() {
 
   const navigateTo = (p: string) => {
     setPage(p);
-    const targetPath = p === 'landing' ? '/' : `/${p}`;
+    const base = getBasePath();
+    const targetPath = p === 'landing' ? `${base}/` : `${base}/${p}`;
     window.history.pushState({ page: p }, '', targetPath);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

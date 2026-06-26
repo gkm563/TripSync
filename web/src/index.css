@@ -1075,3 +1075,325 @@ button, .btn {
   font-size: 1rem;
 }
 
+/* Developer Profile Page Styles */
+.dev-profile-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 40px;
+  display: grid;
+  grid-template-columns: 1.2fr 2fr;
+  gap: 50px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.dev-profile-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.dev-avatar-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.dev-avatar-glow {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  padding: 5px;
+  background: linear-gradient(135deg, hsl(var(--indigo)) 0%, hsl(var(--teal)) 100%);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.25);
+  transition: transform var(--transition-normal);
+}
+
+.dev-avatar-glow:hover {
+  transform: scale(1.03) rotate(3deg);
+}
+
+.dev-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--bg-secondary);
+}
+
+.dev-social-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 30px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.dev-social-pill:hover {
+  background: var(--grad-primary);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+/* Timeline Components */
+.dev-timeline {
+  position: relative;
+  padding-left: 28px;
+  border-left: 2px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  margin-top: 24px;
+}
+
+.dev-timeline-item {
+  position: relative;
+}
+
+.dev-timeline-dot {
+  position: absolute;
+  left: -37px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--grad-primary);
+  border: 4px solid var(--bg-primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.dev-timeline-meta {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dev-timeline-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 4px 0 8px 0;
+  color: var(--text-primary);
+}
+
+.dev-timeline-content {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Stack Cards Grid */
+.dev-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.dev-stack-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all var(--transition-fast);
+}
+
+.dev-stack-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 992px) {
+  .dev-profile-card {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 32px 20px;
+  }
+}
+
+/* APCSIP-2026 Cybersecurity Log Section */
+.cyber-section {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 40px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 40px;
+  margin-bottom: 60px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+  transition: background var(--transition-normal), border var(--transition-normal);
+}
+
+.cyber-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cyber-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cyber-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 24px 0;
+}
+
+.cyber-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(20, 184, 166, 0.08);
+  color: var(--secondary-color);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  transition: all var(--transition-fast);
+}
+
+.cyber-terminal {
+  background: #05070c;
+  border: 1.5px solid #1e293b;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+  height: 320px;
+  transition: all var(--transition-normal);
+}
+
+[data-theme='dark'] .cyber-terminal {
+  border-color: #334155;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
+.terminal-header {
+  background: #0f172a;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #1e293b;
+}
+
+[data-theme='dark'] .terminal-header {
+  border-bottom-color: #334155;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.terminal-dot.red { background: #ef4444; }
+.terminal-dot.yellow { background: #f59e0b; }
+.terminal-dot.green { background: #22c55e; }
+
+.terminal-title {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.terminal-body {
+  padding: 16px;
+  flex-grow: 1;
+  overflow-y: auto;
+  color: #38bdf8; /* cyan-blue */
+  font-size: 0.82rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.terminal-line {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.terminal-line.command {
+  color: #f1f5f9;
+}
+
+.terminal-line.success {
+  color: #4ade80; /* bright green */
+}
+
+.terminal-line.info {
+  color: #94a3b8;
+}
+
+.terminal-line.accent {
+  color: #22d3ee; /* cyan */
+}
+
+.terminal-line.warning {
+  color: #fbbf24;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: #4ade80;
+  margin-left: 4px;
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@media (max-width: 992px) {
+  .cyber-section {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 32px 20px;
+  }
+}
