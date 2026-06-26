@@ -7,18 +7,7 @@ import {
   X, 
   ChevronDown, 
   ShieldCheck, 
-  Sparkles,
-  Monitor,
-  Smartphone,
-  Code,
-  Briefcase,
-  GraduationCap,
-  Info,
-  BookOpen,
-  Newspaper,
-  Shield,
-  Mail,
-  DollarSign
+  Sparkles
 } from 'lucide-react';
 
 interface MarketingLayoutProps {
@@ -155,158 +144,59 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="mobile-menu-drawer">
-          {/* PRODUCT SECTION */}
-          <div className="mobile-menu-section">
-            <h4 className="mobile-menu-title">Product</h4>
-            <div className="mobile-menu-grid">
-              <button onClick={() => handleLinkClick('features')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)' }}>
-                  <Sparkles size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">Features</span>
-                  <span className="mobile-menu-item-desc">Core settlement & sync features</span>
-                </div>
+          <div className="mobile-menu-inner">
+            {/* Primary Navigation links */}
+            <nav className="mobile-menu-nav">
+              <button onClick={() => handleLinkClick('features')} className="mobile-menu-link-wrapper" style={{ '--delay': 1 } as React.CSSProperties}>
+                <span className="mobile-menu-number">01</span>
+                <span className="mobile-menu-large-link">Features</span>
               </button>
               
-              <button onClick={() => handleLinkClick('pricing')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
-                  <DollarSign size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">Pricing</span>
-                  <span className="mobile-menu-item-desc">Flexible plans for everyone</span>
-                </div>
+              <button onClick={() => handleLinkClick('pricing')} className="mobile-menu-link-wrapper" style={{ '--delay': 2 } as React.CSSProperties}>
+                <span className="mobile-menu-number">02</span>
+                <span className="mobile-menu-large-link">Pricing Plans</span>
               </button>
 
-              <button onClick={() => handleLinkClick('desktop')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
-                  <Monitor size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">tripsyncDesktop</span>
-                  <span className="mobile-menu-item-desc">Standalone computer client</span>
-                </div>
+              <button onClick={() => handleLinkClick('desktop')} className="mobile-menu-link-wrapper" style={{ '--delay': 3 } as React.CSSProperties}>
+                <span className="mobile-menu-number">03</span>
+                <span className="mobile-menu-large-link">tripsyncDesktop</span>
               </button>
 
-              <button onClick={() => handleLinkClick('mobile')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' }}>
-                  <Smartphone size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">tripsyncMobile</span>
-                  <span className="mobile-menu-item-desc">Real-time Expo mobile app</span>
-                </div>
+              <button onClick={() => handleLinkClick('mobile')} className="mobile-menu-link-wrapper" style={{ '--delay': 4 } as React.CSSProperties}>
+                <span className="mobile-menu-number">04</span>
+                <span className="mobile-menu-large-link">tripsyncMobile</span>
               </button>
 
-              <button onClick={() => handleLinkClick('developers')} className="mobile-menu-item-btn" style={{ border: '1px dashed var(--primary-color)' }}>
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'var(--grad-primary)' }}>
-                  <Code size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title" style={{ color: 'var(--primary-color)', fontWeight: 800 }}>Developers</span>
-                  <span className="mobile-menu-item-desc">Gautam Kumar Maurya (gkm563)</span>
-                </div>
+              <button onClick={() => handleLinkClick('developers')} className="mobile-menu-link-wrapper" style={{ '--delay': 5 } as React.CSSProperties}>
+                <span className="mobile-menu-number">05</span>
+                <span className="mobile-menu-large-link" style={{ color: 'var(--primary-color)' }}>Developers</span>
               </button>
+            </nav>
+
+            {/* Secondary navigation subsections */}
+            <div className="mobile-menu-subsections">
+              <div className="mobile-menu-subcol">
+                <h5 className="mobile-menu-subcol-title">Solutions</h5>
+                <button onClick={() => handleLinkClick('business')} className="mobile-menu-sublink">Corporate Travel</button>
+                <button onClick={() => handleLinkClick('education')} className="mobile-menu-sublink">Education Groups</button>
+              </div>
+
+              <div className="mobile-menu-subcol">
+                <h5 className="mobile-menu-subcol-title">Company</h5>
+                <button onClick={() => handleLinkClick('about')} className="mobile-menu-sublink">About Us</button>
+                <button onClick={() => handleLinkClick('story')} className="mobile-menu-sublink">Our Story</button>
+                <button onClick={() => handleLinkClick('blog')} className="mobile-menu-sublink">Tech Blog</button>
+                <button onClick={() => handleLinkClick('press')} className="mobile-menu-sublink">Press Kits</button>
+                <button onClick={() => handleLinkClick('legal')} className="mobile-menu-sublink">Legal & Terms</button>
+                <button onClick={() => handleLinkClick('contact')} className="mobile-menu-sublink">Contact Support</button>
+              </div>
             </div>
-          </div>
 
-          {/* SOLUTIONS SECTION */}
-          <div className="mobile-menu-section">
-            <h4 className="mobile-menu-title">Solutions</h4>
-            <div className="mobile-menu-grid">
-              <button onClick={() => handleLinkClick('business')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
-                  <Briefcase size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">Business</span>
-                  <span className="mobile-menu-item-desc">Corporate travel & audits</span>
-                </div>
-              </button>
-
-              <button onClick={() => handleLinkClick('education')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }}>
-                  <GraduationCap size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">Education</span>
-                  <span className="mobile-menu-item-desc">IIT Delhi hackathons & groups</span>
-                </div>
-              </button>
+            {/* Bottom actions */}
+            <div className="mobile-menu-footer-actions">
+              <button onClick={() => { onOpenAuth('login'); setMobileMenuOpen(false); }} className="btn btn-secondary">Sign In</button>
+              <button onClick={() => { onOpenAuth('register'); setMobileMenuOpen(false); }} className="btn btn-primary">Get Started</button>
             </div>
-          </div>
-
-          {/* COMPANY SECTION */}
-          <div className="mobile-menu-section">
-            <h4 className="mobile-menu-title">Company</h4>
-            <div className="mobile-menu-grid">
-              <button onClick={() => handleLinkClick('about')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)' }}>
-                  <Info size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">About Us</span>
-                  <span className="mobile-menu-item-desc">Our mission & core values</span>
-                </div>
-              </button>
-
-              <button onClick={() => handleLinkClick('story')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)' }}>
-                  <BookOpen size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">Our Story</span>
-                  <span className="mobile-menu-item-desc">IIT Delhi to APCSIP-2026</span>
-                </div>
-              </button>
-
-              <button onClick={() => handleLinkClick('blog')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' }}>
-                  <Newspaper size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">Blog Feed</span>
-                  <span className="mobile-menu-item-desc">Read our tech & security blogs</span>
-                </div>
-              </button>
-
-              <button onClick={() => handleLinkClick('press')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
-                  <Users size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">Press Kits</span>
-                  <span className="mobile-menu-item-desc">News releases & media resources</span>
-                </div>
-              </button>
-
-              <button onClick={() => handleLinkClick('legal')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}>
-                  <Shield size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">Legal & Privacy</span>
-                  <span className="mobile-menu-item-desc">Terms of service & data safety</span>
-                </div>
-              </button>
-
-              <button onClick={() => handleLinkClick('contact')} className="mobile-menu-item-btn">
-                <div className="mobile-menu-icon-wrapper" style={{ background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)' }}>
-                  <Mail size={18} />
-                </div>
-                <div className="mobile-menu-item-info">
-                  <span className="mobile-menu-item-title">Contact</span>
-                  <span className="mobile-menu-item-desc">Get in touch with support</span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* ACTIONS */}
-          <div className="mobile-menu-actions">
-            <button onClick={() => { onOpenAuth('login'); setMobileMenuOpen(false); }} className="btn-secondary" style={{ width: '100%', padding: '14px' }}>Sign In</button>
-            <button onClick={() => { onOpenAuth('register'); setMobileMenuOpen(false); }} className="btn-primary" style={{ width: '100%', padding: '14px' }}>Get Started</button>
           </div>
         </div>
       )}
