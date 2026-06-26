@@ -70,8 +70,8 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({
               <div className="glass" style={{ position: 'absolute', top: '45px', left: 0, width: '200px', borderRadius: '12px', padding: '8px', zIndex: 150, display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <button onClick={() => handleLinkClick('features')} className="btn-text" style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.88rem', padding: '8px' }}>Features</button>
                 <button onClick={() => handleLinkClick('pricing')} className="btn-text" style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.88rem', padding: '8px' }}>Pricing</button>
-                <button onClick={() => handleLinkClick('desktop')} className="btn-text" style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.88rem', padding: '8px' }}>tripsyncDesktop</button>
-                <button onClick={() => handleLinkClick('mobile')} className="btn-text" style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.88rem', padding: '8px' }}>tripsyncMobile</button>
+                <button onClick={() => handleLinkClick('desktop')} className="btn-text" style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.88rem', padding: '8px' }}>TripSync Desktop</button>
+                <button onClick={() => handleLinkClick('mobile')} className="btn-text" style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.88rem', padding: '8px' }}>TripSync Mobile</button>
                 <button onClick={() => handleLinkClick('developers')} className="btn-text" style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.88rem', padding: '8px', fontWeight: 700, color: 'var(--primary-color)' }}>Developers</button>
               </div>
             )}
@@ -159,12 +159,12 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({
 
               <button onClick={() => handleLinkClick('desktop')} className="mobile-menu-link-wrapper" style={{ '--delay': 3 } as React.CSSProperties}>
                 <span className="mobile-menu-number">03</span>
-                <span className="mobile-menu-large-link">tripsyncDesktop</span>
+                <span className="mobile-menu-large-link">TripSync Desktop</span>
               </button>
 
               <button onClick={() => handleLinkClick('mobile')} className="mobile-menu-link-wrapper" style={{ '--delay': 4 } as React.CSSProperties}>
                 <span className="mobile-menu-number">04</span>
-                <span className="mobile-menu-large-link">tripsyncMobile</span>
+                <span className="mobile-menu-large-link">TripSync Mobile</span>
               </button>
 
               <button onClick={() => handleLinkClick('developers')} className="mobile-menu-link-wrapper" style={{ '--delay': 5 } as React.CSSProperties}>
@@ -257,8 +257,8 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({
               <ul className="footer-links-list">
                 <li><button onClick={() => handleLinkClick('features')} className="footer-link">Features</button></li>
                 <li><button onClick={() => handleLinkClick('pricing')} className="footer-link">Pricing</button></li>
-                <li><button onClick={() => handleLinkClick('desktop')} className="footer-link">tripsyncDesktop</button></li>
-                <li><button onClick={() => handleLinkClick('mobile')} className="footer-link">tripsyncMobile</button></li>
+                <li><button onClick={() => handleLinkClick('desktop')} className="footer-link">TripSync Desktop</button></li>
+                <li><button onClick={() => handleLinkClick('mobile')} className="footer-link">TripSync Mobile</button></li>
                 <li><button onClick={() => handleLinkClick('developers')} className="footer-link" style={{ color: 'var(--primary-color)', fontWeight: 700 }}>Developers</button></li>
               </ul>
             </div>
@@ -303,7 +303,7 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({
 
           {/* Dynamic SEO Block */}
           <div className="footer-seo-block">
-            <strong>TripSync</strong> by <span className="footer-seo-keywords">Gautam Kumar Maurya (gkm563)</span> is a premium, secure expense splitting application and consensus-based settlement ledger. Originally sparked at <span className="footer-seo-keywords">IIT Delhi</span>, it has been developed to adhere to cyber forensics standards for the <span className="footer-seo-keywords">APCSIP-2026 Cyber Security Internship Program</span> with the <span className="footer-seo-keywords">Amroha Police (Uttar Pradesh Police) Cyber Crime Cell</span>. Designed for multi-platform synchronization across both web and mobile clients (tripsyncMobile, tripsyncDesktop), it streamlines group spending verification, audit trails, and settlement minimization.
+            <strong>TripSync</strong> by <span className="footer-seo-keywords">Gautam Kumar Maurya (gkm563)</span> is a premium, secure expense splitting application and consensus-based settlement ledger. Originally sparked at <span className="footer-seo-keywords">IIT Delhi</span>, it has been developed to adhere to cyber forensics standards for the <span className="footer-seo-keywords">APCSIP-2026 Cyber Security Internship Program</span> with the <span className="footer-seo-keywords">Amroha Police (Uttar Pradesh Police) Cyber Crime Cell</span>. Designed for multi-platform synchronization across both web and mobile clients (TripSync Mobile, TripSync Desktop), it streamlines group spending verification, audit trails, and settlement minimization.
           </div>
 
           {/* Bottom Copyright & Badges */}

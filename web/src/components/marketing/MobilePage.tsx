@@ -72,12 +72,12 @@ export const MobilePage: React.FC = () => {
           <h1 style={{ fontSize: '2.8rem', lineHeight: '1.2' }}>
             TripSync on the Go with <br/>
             <span style={{ background: 'var(--grad-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              tripsyncMobile
+              TripSync Mobile
             </span>
           </h1>
           
           <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginTop: '16px', lineHeight: '1.6' }}>
-            Built using React Native and Expo, tripsyncMobile fits right in your pocket. Sync contributions instantly in the middle of field operations, hackathon venues, or remote camps.
+            Built using React Native and Expo, TripSync Mobile fits right in your pocket. Sync contributions instantly in the middle of field operations, hackathon venues, or remote camps.
           </p>
 
           {/* Core mobile features */}

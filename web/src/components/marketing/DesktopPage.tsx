@@ -24,7 +24,7 @@ export const DesktopPage: React.FC = () => {
           <h1 style={{ fontSize: '2.8rem', lineHeight: '1.2' }}>
             Introducing <br/>
             <span style={{ background: 'var(--grad-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              tripsyncDesktop
+              TripSync Desktop
             </span>
           </h1>
           

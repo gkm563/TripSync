@@ -8,7 +8,7 @@ export const Developers: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr', gap: '50px', alignItems: 'center', marginBottom: '80px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '16px' }}>
           <img 
-            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80" 
+            src="/Gautam_Kumar_Maurya.jpg" 
             alt="Gautam Kumar Maurya (gkm563)" 
             style={{ width: '220px', height: '220px', borderRadius: '50%', objectFit: 'cover', border: '5px solid var(--primary-color)', boxShadow: 'var(--shadow-lg)' }} 
           />

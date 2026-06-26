@@ -42,7 +42,7 @@ if (USE_FIREBASE) {
 export { app, auth, db };
 
 export const mockUsersList = [
-  { uid: 'gautam_uid', name: 'Gautam', email: 'gautam@tripsync.com', photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80', joinedAt: new Date().toISOString(), fcmToken: null },
+  { uid: 'gautam_uid', name: 'Gautam', email: 'gautam@tripsync.com', photoURL: '/Gautam_Kumar_Maurya.jpg', joinedAt: new Date().toISOString(), fcmToken: null },
   { uid: 'rohit_uid', name: 'Rohit', email: 'rohit@tripsync.com', photoURL: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80', joinedAt: new Date().toISOString(), fcmToken: null },
   { uid: 'praveen_uid', name: 'Praveen', email: 'praveen@tripsync.com', photoURL: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=150&q=80', joinedAt: new Date().toISOString(), fcmToken: null },
 ];

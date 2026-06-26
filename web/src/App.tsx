@@ -34,22 +34,22 @@ function App() {
       document.title = "TripSync Dashboard — Group Contribution Tracking Ledger";
       return;
     }
-    
+
     const titles: Record<string, string> = {
-      landing: "TripSync — Premium Group Contribution & Settlement Tracker by Gautam Kumar Maurya (gkm563)",
-      pricing: "TripSync Pricing — Simple Free & Pro split budget tracking",
-      desktop: "tripsyncDesktop — Manage collaborative travel lists on laptop & PC",
-      mobile: "tripsyncMobile — Android APK & iOS App Store downloads",
-      developers: "Gautam Kumar Maurya (gkm563) — Lead systems architect biography",
-      features: "TripSync Features — Consensus queues, audit logs & duplicate checks",
-      business: "TripSync Solutions — Secure audits & travel ledger splits for business teams",
-      education: "TripSync Solutions — Budget tracking for hackathons & IIT Delhi event stories",
-      about: "About TripSync — Creator biography and open-source product values",
-      story: "TripSync Origin Story — University event sparks & APCSIP-2026 logs",
-      blog: "TripSync Blog — Digital ledger forensics & TypeScript split algorithms",
-      press: "Press releases and official media announcements — Gautam Kumar Maurya",
-      legal: "TripSync Legal & Privacy — Encryption, data policies, and MIT license",
-      contact: "Contact Gautam Kumar Maurya (gkm563) — TripSync support and integrations"
+      landing: "TripSync — Premium Group Contribution & Settlement Tracker",
+      pricing: "Pricing — TripSync",
+      desktop: "Desktop App — TripSync",
+      mobile: "Mobile App — TripSync",
+      developers: "API & Developers — TripSync",
+      features: "Features — TripSync",
+      business: "TripSync for Business",
+      education: "TripSync for Education",
+      about: "About Us — TripSync",
+      story: "Our Story — TripSync",
+      blog: "Blog — TripSync",
+      press: "Press — TripSync",
+      legal: "Legal & Privacy — TripSync",
+      contact: "Contact Us — TripSync",
     };
 
     document.title = titles[page] || "TripSync — Premium Group Contribution & Settlement Tracker";

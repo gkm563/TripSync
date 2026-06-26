@@ -115,7 +115,7 @@ export const Blog: React.FC = () => {
           {/* About Author Footer */}
           <div style={{ marginTop: '60px', padding: '30px', borderRadius: '18px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', gap: '16px', alignItems: 'center' }}>
             <img 
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" 
+              src="/Gautam_Kumar_Maurya.jpg" 
               alt={activePost.author} 
               style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary-color)' }}
             />
