@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { 
-  Users, 
   TrendingUp, 
   CheckCircle, 
   Clock, 
   FileText, 
-  Lock, 
   Smartphone, 
   ChevronRight, 
-  Play, 
-  Moon, 
-  Sun 
+  Play 
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -20,7 +16,7 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
   const { usersList, login } = useAuthStore();
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
   
   // Simulated Interactive Settlement calculations for the mock screen demo
   const [simExpenses, setSimExpenses] = useState<{title: string, amount: number, paidBy: string}[]>([
@@ -58,11 +54,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
     Praveen: contribs.Praveen - perMemberSim
   };
 
-  const toggleTheme = () => {
-    const nextTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
-  };
 
   const handleQuickLogin = async (email: string) => {
     try {
@@ -74,25 +65,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
 
   return (
     <div style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
-      {/* Navbar */}
-      <header className="landing-nav" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
-        <div className="logo-container">
-          <Users size={28} style={{ stroke: 'url(#indTealGrad)' }} />
-          <span>TripSync</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <button 
-            onClick={toggleTheme} 
-            className="btn-secondary" 
-            style={{ padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            title="Toggle Theme"
-          >
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
-          <button onClick={() => onOpenAuth('login')} className="btn-secondary">Sign In</button>
-          <button onClick={() => onOpenAuth('register')} className="btn-primary">Get Started</button>
-        </div>
-      </header>
+      <div style={{ height: '40px' }}></div>
 
       {/* Hero Section */}
       <main className="container">
@@ -332,51 +305,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer style={{ borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)', padding: '60px 24px 30px 24px', marginTop: '80px' }}>
-        <div className="container" style={{ display: 'grid', gridTemplateColumns: '1.5fr repeat(3, 1fr)', gap: '40px', marginBottom: '40px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className="logo-container">
-              <Users size={24} style={{ stroke: 'url(#indTealGrad)' }} />
-              <span>TripSync</span>
-            </div>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', maxWidth: '280px' }}>
-              Premium real-time settlement tracking for hackathons, tours, and small collaborative travel projects.
-            </p>
-          </div>
-          <div>
-            <h5 style={{ fontSize: '0.95rem', marginBottom: '16px', color: 'var(--text-primary)' }}>Application</h5>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem' }}>
-              <li><a href="#" onClick={() => onOpenAuth('login')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Sign In Portal</a></li>
-              <li><a href="#" onClick={() => onOpenAuth('register')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Sign Up Portal</a></li>
-              <li><a href="#demo-login-section" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Quick Switch Demo</a></li>
-            </ul>
-          </div>
-          <div>
-            <h5 style={{ fontSize: '0.95rem', marginBottom: '16px', color: 'var(--text-primary)' }}>Features</h5>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem' }}>
-              <li><span style={{ color: 'var(--text-secondary)' }}>Instant Sync</span></li>
-              <li><span style={{ color: 'var(--text-secondary)' }}>Consensus Voting</span></li>
-              <li><span style={{ color: 'var(--text-secondary)' }}>Greedy Debt Settler</span></li>
-            </ul>
-          </div>
-          <div>
-            <h5 style={{ fontSize: '0.95rem', marginBottom: '16px', color: 'var(--text-primary)' }}>Legal</h5>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem' }}>
-              <li><span style={{ color: 'var(--text-secondary)' }}>Privacy Policy</span></li>
-              <li><span style={{ color: 'var(--text-secondary)' }}>Terms of Service</span></li>
-              <li><span style={{ color: 'var(--text-secondary)' }}>MIT License</span></li>
-            </ul>
-          </div>
-        </div>
 
-        <div className="container" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          <p>© {new Date().getFullYear()} TripSync. Created with premium UX design.</p>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Lock size={12} /> Secure Client Connections</span>
-          </div>
-        </div>
-      </footer>
 
       {/* SVG Gradient definitions for general icons */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
