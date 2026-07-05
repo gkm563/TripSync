@@ -3730,3 +3730,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(sync): enhance offline change conflict resolution rules`
 - **Ref**: `sync-236649`
 
+### Sprint Update: 2026-07-05 14:47:04
+- **Scope**: `style(ui): polish travel timeline connector lines and badges`
+- **Ref**: `sync-329877`
+
