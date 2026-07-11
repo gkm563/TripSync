@@ -630,3 +630,7 @@ Daily activity and development milestones tracking.
 - **Activity**: perf: reduce map tile rendering overhead
 - **Checkpoint**: `952448`
 
+### Entry: 2026-07-11 22:45:52
+- **Activity**: fix: handle offline state fallbacks gracefully
+- **Checkpoint**: `505523`
+
