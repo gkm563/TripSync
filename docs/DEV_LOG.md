@@ -666,3 +666,7 @@ Daily activity and development milestones tracking.
 - **Activity**: docs: update itinerary planning guide
 - **Checkpoint**: `908191`
 
+### Entry: 2026-07-18 22:20:29
+- **Activity**: feat(geo): refine route calculation helper
+- **Checkpoint**: `495700`
+
