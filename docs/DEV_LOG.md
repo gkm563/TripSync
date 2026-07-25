@@ -3854,3 +3854,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(sync): enhance offline change conflict resolution rules`
 - **Ref**: `sync-383654`
 
+### Sprint Update: 2026-07-25 19:28:14
+- **Scope**: `test(calc): verify precision of split bill rounding algorithms`
+- **Ref**: `sync-836202`
+
