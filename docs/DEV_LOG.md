@@ -3850,3 +3850,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `fix(map): correct marker placement coordinate offset on zoom`
 - **Ref**: `sync-813075`
 
+### Sprint Update: 2026-07-25 19:04:24
+- **Scope**: `refactor(sync): enhance offline change conflict resolution rules`
+- **Ref**: `sync-383654`
+
