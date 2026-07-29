@@ -722,3 +722,7 @@ Daily activity and development milestones tracking.
 - **Activity**: docs(api): document travel sync schemas
 - **Checkpoint**: `528016`
 
+### Entry: 2026-07-29 10:19:09
+- **Activity**: docs: update itinerary planning guide
+- **Checkpoint**: `626896`
+
