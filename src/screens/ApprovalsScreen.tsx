@@ -64,7 +64,7 @@ export default function ApprovalsScreen() {
             { text: 'Cancel', style: 'cancel' },
             {
               text: 'Submit',
-              onPress: async (reason) => {
+              onPress: async (reason?: string) => {
                 if (!reason) {
                   Alert.alert('Error', 'Reason is required to reject an expense');
                   return;

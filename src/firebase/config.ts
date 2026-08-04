@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence, getAuth } from 'firebase/auth';
+import { initializeAuth, getAuth } from 'firebase/auth';
 import { initializeFirestore, getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -34,9 +34,14 @@ if (USE_FIREBASE) {
 
     // Safely initialize or retrieve Auth
     try {
-      auth = initializeAuth(app, {
-        persistence: getReactNativePersistence(AsyncStorage),
-      });
+      const authModule = require('firebase/auth');
+      if (authModule.getReactNativePersistence) {
+        auth = initializeAuth(app, {
+          persistence: authModule.getReactNativePersistence(AsyncStorage),
+        });
+      } else {
+        auth = getAuth(app);
+      }
     } catch (authErr) {
       auth = getAuth(app);
     }

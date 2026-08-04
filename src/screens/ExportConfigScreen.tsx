@@ -204,10 +204,11 @@ export default function ExportConfigScreen() {
       // Compile Workbook to Base64
       const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
       const filename = `TripSync_${trip.name.replace(/\s+/g, '_')}_Report.xlsx`;
-      const fileUri = FileSystem.cacheDirectory + filename;
+      const fsAny = FileSystem as any;
+      const fileUri = (fsAny.cacheDirectory || fsAny.documentDirectory || '') + filename;
 
-      await FileSystem.writeAsStringAsync(fileUri, wbout, {
-        encoding: FileSystem.EncodingType.Base64
+      await fsAny.writeAsStringAsync(fileUri, wbout, {
+        encoding: fsAny.EncodingType?.Base64 || 'base64'
       });
 
       await Sharing.shareAsync(fileUri, {
@@ -396,6 +397,7 @@ export default function ExportConfigScreen() {
             </thead>
             <tbody>
         `;
+        const majorityNeeded = Math.floor((trip?.members?.length || 1) / 2) + 1;
         pendingList.forEach((e) => {
           const score = Object.values(e.votes || {}).reduce((a, b) => a + b, 0);
           html += `

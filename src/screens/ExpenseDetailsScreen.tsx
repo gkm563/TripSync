@@ -111,7 +111,7 @@ export default function ExpenseDetailsScreen() {
             { text: 'Cancel', style: 'cancel' },
             {
               text: 'Reject',
-              onPress: async (reason) => {
+              onPress: async (reason?: string) => {
                 if (!reason) {
                   Alert.alert('Error', 'Reason is required to reject an expense');
                   return;
@@ -1141,5 +1141,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.light.primary,
     marginTop: SPACING.xs,
+  },
+  dotApprove: {
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+  },
+  dotReject: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
   },
 });

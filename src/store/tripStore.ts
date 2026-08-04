@@ -137,7 +137,7 @@ export const useTripStore = create<TripState>()(
       respondToInvitation: async (invitationId, userId, accept) => {
         set({ loading: true, error: null });
         try {
-          const status = accept ? 'accepted' : 'declined';
+          const status: 'accepted' | 'declined' = accept ? 'accepted' : 'declined';
           const respondedAt = new Date().toISOString();
 
           if (USE_FIREBASE && db) {
@@ -224,7 +224,7 @@ export const useTripStore = create<TripState>()(
                   return {
                     ...trip,
                     endRequests,
-                    status: shouldComplete ? 'completed' : 'active',
+                    status: (shouldComplete ? 'completed' : 'active') as 'completed' | 'active',
                   };
                 }
                 return trip;

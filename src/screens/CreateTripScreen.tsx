@@ -125,7 +125,7 @@ export default function CreateTripScreen() {
                 onPress={() => setSelectedGradient(grad.id)}
               >
                 <LinearGradient
-                  colors={grad.colors}
+                  colors={grad.colors as [string, string, ...string[]]}
                   style={styles.gradientPreview}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}

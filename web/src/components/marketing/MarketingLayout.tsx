@@ -7,7 +7,8 @@ import {
   X, 
   ChevronDown, 
   ShieldCheck, 
-  Sparkles
+  Sparkles,
+  Download
 } from 'lucide-react';
 
 interface MarketingLayoutProps {
@@ -24,6 +25,7 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<'product' | 'solutions' | 'company' | null>(null);
+  const [showApkModal, setShowApkModal] = useState(false);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';
@@ -277,7 +279,7 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({
               <h5 className="footer-heading">DOWNLOADS</h5>
               <div className="footer-badge-container">
                 {/* Google Play Styled Button */}
-                <a href="#" className="footer-badge-link" onClick={(e) => e.preventDefault()} title="Get it on Google Play">
+                <a href="#" className="footer-badge-link" onClick={(e) => { e.preventDefault(); setShowApkModal(true); }} title="Get it on Google Play">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#0d9488' }}>
                     <path d="M3.609 1.814L13.78 12 3.609 22.186c-.18.18-.328.087-.328-.168V1.982c0-.255.148-.348.328-.168zM14.654 11.127l2.843-1.636c.465-.267.465-.705 0-.972l-2.843-1.636-.88 1.134 2.106 1.474-2.106 1.474.88 1.162zM3.86 1.579l10.971 7.747 1.096-1.41L4.956.169c-.279-.161-.599-.074-.712.193L3.86 1.579zm10.971 13.101L3.86 22.421l.384 1.217c.113.267.433.354.712.193l10.971-7.576-1.096-1.576z"/>
                   </svg>
@@ -288,7 +290,7 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({
                 </a>
                 
                 {/* App Store Styled Button */}
-                <a href="#" className="footer-badge-link" onClick={(e) => e.preventDefault()} title="Download on the App Store">
+                <a href="#" className="footer-badge-link" onClick={(e) => { e.preventDefault(); setShowApkModal(true); }} title="Download on the App Store">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-primary)' }}>
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-.96.04-2.13.64-2.82 1.45-.6.69-1.12 1.83-.98 2.94.1.08 2.15.48 2.81-1.33z"/>
                   </svg>
@@ -321,6 +323,132 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({
 
         </div>
       </footer>
+
+      {/* APK Download & Store Sponsoring Modal */}
+      {showApkModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--card-bg, #ffffff)',
+            borderRadius: '24px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '100%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
+            border: '1px solid var(--border-color)',
+            position: 'relative'
+          }}>
+            <button 
+              onClick={() => setShowApkModal(false)} 
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--text-secondary)'
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+              <div style={{ padding: '12px', borderRadius: '16px', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)' }}>
+                <Sparkles size={26} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700 }}>TripSync Mobile APK</h3>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Production Ready Android Application</p>
+              </div>
+            </div>
+
+            <div style={{
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              borderRadius: '16px',
+              padding: '18px',
+              marginBottom: '22px',
+              fontSize: '0.9rem',
+              color: 'var(--text-primary)',
+              lineHeight: '1.55'
+            }}>
+              <p style={{ margin: 0, marginBottom: '8px', fontWeight: 700, color: '#d97706', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                ℹ️ Store Publication Notice
+              </p>
+              <p style={{ margin: 0 }}>
+                Google Play Store and Apple App Store require paid developer accounts ($25 / ₹2,000+) to publish official store apps, which are currently unsponsored.
+                <br /><br />
+                You can download the production-ready <b>TripSync APK</b> file directly below to install it on your Android phone! If you wish to support publishing on official app stores, you can contribute to the developer via UPI:
+              </p>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: '14px',
+                padding: '12px 14px',
+                backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                borderRadius: '12px',
+                fontWeight: 700,
+                color: '#b45309',
+                border: '1px solid rgba(245, 158, 11, 0.2)'
+              }}>
+                <span style={{ fontFamily: 'monospace', fontSize: '0.95rem' }}>8924059058@upi</span>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText('8924059058@upi');
+                    alert('UPI ID copied to clipboard: 8924059058@upi');
+                  }}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    backgroundColor: '#f59e0b',
+                    color: '#fff',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.82rem',
+                    fontWeight: 600
+                  }}
+                >
+                  Copy UPI
+                </button>
+              </div>
+            </div>
+
+            <a
+              href="./TripSync.apk"
+              download="TripSync.apk"
+              className="btn-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                padding: '14px',
+                borderRadius: '14px',
+                textDecoration: 'none',
+                fontWeight: 700,
+                fontSize: '1rem',
+                textAlign: 'center'
+              }}
+            >
+              <Download size={20} /> Download Android APK (TripSync.apk)
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* SVG Gradient definitions for menu icon */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>

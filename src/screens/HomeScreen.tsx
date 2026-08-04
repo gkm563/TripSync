@@ -91,7 +91,7 @@ export default function HomeScreen() {
         onPress={() => navigation.navigate('TripDetail', { tripId: item.id })}
       >
         <LinearGradient
-          colors={gradientColors}
+          colors={gradientColors as [string, string, ...string[]]}
           style={styles.cardGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}

@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import { useAuthStore } from '../store/authStore';
+import React from 'react';
 import { 
   TrendingUp, 
   CheckCircle, 
   Clock, 
   FileText, 
   Smartphone, 
-  ChevronRight, 
-  Play 
+  ChevronRight
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -15,53 +13,6 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
-  const { usersList, login } = useAuthStore();
-
-  
-  // Simulated Interactive Settlement calculations for the mock screen demo
-  const [simExpenses, setSimExpenses] = useState<{title: string, amount: number, paidBy: string}[]>([
-    { title: 'Train Tickets', amount: 3000, paidBy: 'Praveen' },
-    { title: 'Hotel Booking', amount: 6000, paidBy: 'Rohit' },
-    { title: 'Lunch Cafe', amount: 1500, paidBy: 'Gautam' }
-  ]);
-  
-  const [newExpTitle, setNewExpTitle] = useState('');
-  const [newExpAmount, setNewExpAmount] = useState('');
-  const [newExpPaidBy, setNewExpPaidBy] = useState('Praveen');
-  
-  const addSimExpense = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newExpTitle || !newExpAmount) return;
-    setSimExpenses([...simExpenses, {
-      title: newExpTitle,
-      amount: parseFloat(newExpAmount),
-      paidBy: newExpPaidBy
-    }]);
-    setNewExpTitle('');
-    setNewExpAmount('');
-  };
-
-  // Quick calculate for simulated data
-  const totalSim = simExpenses.reduce((sum, item) => sum + item.amount, 0);
-  const perMemberSim = totalSim / 3;
-  const contribs: Record<string, number> = { Gautam: 0, Rohit: 0, Praveen: 0 };
-  simExpenses.forEach(exp => {
-    contribs[exp.paidBy] += exp.amount;
-  });
-  const balancesSim = {
-    Gautam: contribs.Gautam - perMemberSim,
-    Rohit: contribs.Rohit - perMemberSim,
-    Praveen: contribs.Praveen - perMemberSim
-  };
-
-
-  const handleQuickLogin = async (email: string) => {
-    try {
-      await login(email);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   return (
     <div style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
@@ -102,14 +53,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
                 Create Free Account <ChevronRight size={18} />
               </button>
               <button 
-                onClick={() => {
-                  const demoSection = document.getElementById('demo-login-section');
-                  demoSection?.scrollIntoView({ behavior: 'smooth' });
-                }} 
+                onClick={() => onOpenAuth('login')} 
                 className="btn-secondary" 
                 style={{ padding: '14px 28px', fontSize: '1.05rem' }}
               >
-                <Play size={16} fill="currentColor" /> Try Demo Profiles
+                Sign In to Dashboard
               </button>
             </div>
 
@@ -130,83 +78,43 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
             </div>
           </div>
 
-          {/* Interactive Phone Screen Mockup */}
+          {/* App Preview Card */}
           <div className="hero-visual">
             <div className="hero-mockup-frame animate-float">
               <div className="hero-mockup-screen">
-                <div style={{ borderBottom: '1px solid #1e293b', paddingBottom: '12px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>📱 TripSync Demo</span>
-                  <span className="badge" style={{ backgroundColor: 'rgba(20, 184, 166, 0.2)', color: '#14b8a6', fontSize: '0.65rem' }}>Active</span>
+                <div style={{ borderBottom: '1px solid #1e293b', paddingBottom: '12px', marginBottom: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc' }}>⚡ TripSync Dashboard</span>
+                  <span className="badge" style={{ backgroundColor: 'rgba(20, 184, 166, 0.2)', color: '#14b8a6', fontSize: '0.7rem' }}>Synchronized</span>
                 </div>
                 
                 {/* Stats */}
-                <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)', padding: '12px', borderRadius: '12px', marginBottom: '14px', border: '1px solid #312e81' }}>
+                <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)', padding: '16px', borderRadius: '14px', marginBottom: '16px', border: '1px solid #312e81' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Total Shared</span>
-                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Per Person</span>
+                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Active Trip Ledger</span>
+                    <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>Zero Math Stress</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#6366f1' }}>₹{totalSim}</span>
-                    <span style={{ fontSize: '1.05rem', fontWeight: 700, color: '#10b981' }}>₹{perMemberSim.toFixed(0)}</span>
+                    <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#6366f1' }}>₹10,500</span>
+                    <span style={{ fontSize: '0.9rem', color: '#cbd5e1' }}>3 Members Settled</span>
                   </div>
                 </div>
 
                 {/* Balances list */}
-                <div style={{ marginBottom: '14px' }}>
-                  <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Group Net Balances</span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {Object.entries(balancesSim).map(([name, bal]) => (
-                      <div key={name} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px', borderRadius: '6px', backgroundColor: '#1e293b', fontSize: '0.75rem' }}>
-                        <span>{name}</span>
-                        <span style={{ fontWeight: 700, color: bal >= 0 ? '#10b981' : '#f43f5e' }}>
-                          {bal >= 0 ? `+₹${bal.toFixed(0)}` : `-₹${Math.abs(bal).toFixed(0)}`}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Simulated additions */}
-                <form onSubmit={addSimExpense} style={{ display: 'flex', gap: '4px', marginBottom: '14px' }}>
-                  <input 
-                    type="text" 
-                    placeholder="Expense" 
-                    value={newExpTitle}
-                    onChange={(e) => setNewExpTitle(e.target.value)}
-                    style={{ flex: 2, padding: '6px 8px', fontSize: '0.75rem', borderRadius: '6px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' }}
-                  />
-                  <input 
-                    type="number" 
-                    placeholder="₹" 
-                    value={newExpAmount}
-                    onChange={(e) => setNewExpAmount(e.target.value)}
-                    style={{ flex: 1, padding: '6px 8px', fontSize: '0.75rem', borderRadius: '6px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' }}
-                  />
-                  <select
-                    value={newExpPaidBy}
-                    onChange={(e) => setNewExpPaidBy(e.target.value)}
-                    style={{ padding: '4px 6px', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #334155', backgroundColor: '#1e293b', color: 'white' }}
-                  >
-                    <option value="Praveen">Praveen</option>
-                    <option value="Gautam">Gautam</option>
-                    <option value="Rohit">Rohit</option>
-                  </select>
-                  <button type="submit" style={{ padding: '6px 8px', borderRadius: '6px', backgroundColor: '#6366f1', color: 'white', border: 'none', fontSize: '0.75rem', fontWeight: 'bold' }}>+</button>
-                </form>
-
-                {/* Expenses History */}
-                <div style={{ flex: 1, overflowY: 'auto' }}>
-                  <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Expense History ({simExpenses.length})</span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {simExpenses.slice(-3).reverse().map((exp, i) => (
-                      <div key={i} style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', padding: '8px', borderRadius: '8px', backgroundColor: '#111827', borderLeft: '3px solid #6366f1', fontSize: '0.7rem' }}>
-                        <div>
-                          <p style={{ fontWeight: 600, color: 'white' }}>{exp.title}</p>
-                          <p style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Paid by {exp.paidBy}</p>
-                        </div>
-                        <span style={{ fontWeight: 700, color: '#f8fafc' }}>₹{exp.amount}</span>
-                      </div>
-                    ))}
+                <div style={{ marginBottom: '16px' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '8px' }}>Consensus Approved Ledger</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: '8px', backgroundColor: '#1e293b', fontSize: '0.8rem' }}>
+                      <span>Praveen</span>
+                      <span style={{ fontWeight: 700, color: '#10b981' }}>+₹1,500</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: '8px', backgroundColor: '#1e293b', fontSize: '0.8rem' }}>
+                      <span>Rohit</span>
+                      <span style={{ fontWeight: 700, color: '#10b981' }}>+₹2,000</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: '8px', backgroundColor: '#1e293b', fontSize: '0.8rem' }}>
+                      <span>Gautam</span>
+                      <span style={{ fontWeight: 700, color: '#f43f5e' }}>-₹3,500</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -264,43 +172,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
           </div>
         </section>
 
-        {/* Demo Profiles Section */}
+        {/* Get Started Section */}
         <section id="demo-login-section" style={{ padding: '80px 24px', backgroundColor: 'var(--bg-secondary)', borderRadius: '24px', border: '1px solid var(--border-color)', margin: '40px 0', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '2.2rem', marginBottom: '12px' }}>Try TripSync Instant Demo</h2>
+          <h2 style={{ fontSize: '2.2rem', marginBottom: '12px' }}>Start Splitting Expenses Effortlessly</h2>
           <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto 40px auto' }}>
-            No sign up required. Select one of the pre-loaded members below to log into the test environment. Open multiple browser tabs under different members to experience instant sync approvals live!
+            Join thousands of travelers, internship groups, and teams. Create your account in seconds or sign in to access your synchronized trips across mobile and web!
           </p>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap' }}>
-            {usersList.map((user) => (
-              <div 
-                key={user.uid} 
-                className="glass" 
-                style={{ 
-                  padding: '24px', 
-                  borderRadius: '16px', 
-                  width: '180px', 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  gap: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onClick={() => handleQuickLogin(user.email)}
-              >
-                <img 
-                  src={user.photoURL} 
-                  alt={user.name} 
-                  style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary-color)' }} 
-                />
-                <h4 style={{ fontSize: '1.1rem' }}>{user.name}</h4>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{user.email}</p>
-                <button className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: '8px', width: '100%', marginTop: '6px' }}>
-                  Login as {user.name}
-                </button>
-              </div>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+            <button 
+              onClick={() => onOpenAuth('register')} 
+              className="btn-primary" 
+              style={{ padding: '16px 36px', fontSize: '1.1rem', borderRadius: '14px', fontWeight: 700 }}
+            >
+              Create Free Account <ChevronRight size={18} />
+            </button>
+            <button 
+              onClick={() => onOpenAuth('login')} 
+              className="btn-secondary" 
+              style={{ padding: '16px 36px', fontSize: '1.1rem', borderRadius: '14px', fontWeight: 700 }}
+            >
+              Sign In to Dashboard
+            </button>
           </div>
         </section>
       </main>

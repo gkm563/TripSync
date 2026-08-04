@@ -323,7 +323,7 @@ export default function TripDetailScreen() {
             { text: 'Cancel', style: 'cancel' },
             {
               text: 'Submit',
-              onPress: async (reason) => {
+              onPress: async (reason?: string) => {
                 if (!reason) {
                   Alert.alert('Error', 'Reason is required to reject an expense');
                   return;
@@ -1130,10 +1130,10 @@ export default function TripDetailScreen() {
                         requestEndTrip(tripId, user.uid);
                       }
                     }}
-                    disabled={trip.status === 'completed'}
+                    disabled={(trip.status as string) === 'completed'}
                   >
                     <Text style={styles.endTripBtnText}>
-                      {trip.status === 'completed'
+                      {(trip.status as string) === 'completed'
                         ? 'Trip is Completed & Locked'
                         : trip.endRequests?.includes(user.uid)
                           ? 'Withdraw Agreement'
@@ -2738,7 +2738,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: -16,
   },
-  timelineContentCard: {
+  timelineCardGroupStyle: {
     flex: 1,
     backgroundColor: '#f8fafc',
     borderRadius: RADIUS.md,
@@ -2798,5 +2798,19 @@ const styles = StyleSheet.create({
     color: COLORS.light.textSecondary,
     marginTop: 2,
     lineHeight: 15,
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  memberProfile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: SPACING.sm,
+  },
+  memberName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.light.text,
   },
 });

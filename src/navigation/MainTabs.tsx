@@ -145,7 +145,7 @@ export default function MainTabs() {
               return;
             }
             // Add expense to the most recently created active trip
-            navigation.navigate('AddExpense', { tripId: activeTrips[0].id });
+            navigation.navigate('AddExpense' as any, { tripId: activeTrips[0].id });
           },
         })}
       />
