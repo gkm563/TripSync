@@ -3882,3 +3882,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `docs(specs): document trip collaboration websocket protocol`
 - **Ref**: `sync-873557`
 
+### Sprint Update: 2026-08-04 16:32:01
+- **Scope**: `fix(map): correct marker placement coordinate offset on zoom`
+- **Ref**: `sync-114583`
+
