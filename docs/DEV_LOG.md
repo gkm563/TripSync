@@ -766,3 +766,7 @@ Daily activity and development milestones tracking.
 - **Activity**: refactor: optimize location caching layer
 - **Checkpoint**: `379658`
 
+### Entry: 2026-08-05 18:33:47
+- **Activity**: fix: handle offline state fallbacks gracefully
+- **Checkpoint**: `336946`
+
