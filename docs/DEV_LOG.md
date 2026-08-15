@@ -818,3 +818,7 @@ Daily activity and development milestones tracking.
 - **Activity**: fix: handle offline state fallbacks gracefully
 - **Checkpoint**: `821265`
 
+### Entry: 2026-08-15 11:00:06
+- **Activity**: feat(geo): refine route calculation helper
+- **Checkpoint**: `601928`
+
