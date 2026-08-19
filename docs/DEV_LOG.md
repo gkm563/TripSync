@@ -3974,3 +3974,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `refactor(sync): enhance offline change conflict resolution rules`
 - **Ref**: `sync-381044`
 
+### Sprint Update: 2026-08-19 21:13:43
+- **Scope**: `fix(map): correct marker placement coordinate offset on zoom`
+- **Ref**: `sync-818662`
+
