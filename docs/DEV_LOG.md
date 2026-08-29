@@ -4026,3 +4026,7 @@ Daily activity and development milestones tracking.
 - **Scope**: `feat(expenses): add multi-currency breakdown on group settle up view`
 - **Ref**: `sync-782356`
 
+### Sprint Update: 2026-08-29 11:30:45
+- **Scope**: `style(ui): polish travel timeline connector lines and badges`
+- **Ref**: `sync-595405`
+
