@@ -962,3 +962,7 @@ Daily activity and development milestones tracking.
 - **Activity**: chore: dependency updates and linting
 - **Checkpoint**: `794350`
 
+### Entry: 2026-09-07 10:58:50
+- **Activity**: feat(geo): refine route calculation helper
+- **Checkpoint**: `851770`
+
