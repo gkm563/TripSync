@@ -986,3 +986,7 @@ Daily activity and development milestones tracking.
 - **Activity**: fix: handle offline state fallbacks gracefully
 - **Checkpoint**: `689273`
 
+### Entry: 2026-09-08 21:32:23
+- **Activity**: docs: update itinerary planning guide
+- **Checkpoint**: `886216`
+
