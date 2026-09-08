@@ -982,3 +982,7 @@ Daily activity and development milestones tracking.
 - **Activity**: docs(api): document travel sync schemas
 - **Checkpoint**: `315605`
 
+### Entry: 2026-09-08 19:56:11
+- **Activity**: fix: handle offline state fallbacks gracefully
+- **Checkpoint**: `689273`
+
